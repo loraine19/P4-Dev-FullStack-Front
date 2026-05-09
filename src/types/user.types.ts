@@ -1,4 +1,4 @@
-export interface User {
+export interface UserPublic {
   id: number;
   email: string;
   name: string;
@@ -7,6 +7,7 @@ export interface User {
 export interface LoginPayload {
   email: string;
   password: string;
+  isMobile?: boolean;
 }
 
 export interface RegisterPayload {
@@ -16,5 +17,6 @@ export interface RegisterPayload {
 }
 
 export interface AuthResponse {
-  access_token: string;
+  user: UserPublic;
+  access_token?: string; // absent en mode web (cookie httpOnly)
 }
