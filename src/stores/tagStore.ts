@@ -1,20 +1,20 @@
 import { create } from 'zustand';
 import type { Tag } from '../types/tag.types';
 
-/* ITAGS STATE */
-interface ITagsState {
+/* ITAG STATE */
+interface ITagState {
   tags: Tag[];
 }
 
-/* ITAGS ACTIONS */
-interface ITagsActions {
+/* ITAG ACTIONS */
+interface ITagActions {
   setTags(tags: Tag[]): void;
   addTag(tag: Tag): void;
   removeTag(id: number): void;
 }
 
-/* TAGS STORE */
-const useTagsStore = create<ITagsState & ITagsActions>((set) => ({
+/* TAG STORE */
+const useTagStore = create<ITagState & ITagActions>((set) => ({
   tags: [],
 
   /* SET TAGS */
@@ -27,4 +27,4 @@ const useTagsStore = create<ITagsState & ITagsActions>((set) => ({
   removeTag: (id) => set((s) => ({ tags: s.tags.filter((t) => t.id !== id) })),
 }));
 
-export default useTagsStore;
+export default useTagStore;

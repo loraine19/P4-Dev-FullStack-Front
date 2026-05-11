@@ -1,6 +1,14 @@
-// UploadPage — formulaire d'upload d'un fichier (expiration, mot de passe, tags)
+import UploadForm from '../components/upload/UploadForm';
+
+/* UPLOAD PAGE */
 const UploadPage = () => {
-  return <div>UploadPage</div>;
+  return (
+    <main className="clear-page">
+      <section className="stack-center">
+        <UploadForm />
+      </section>
+    </main>
+  );
 };
 
 export default UploadPage;

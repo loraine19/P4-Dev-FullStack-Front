@@ -18,5 +18,11 @@ export interface RegisterPayload {
 
 export interface AuthResponse {
   user: UserPublic;
-  access_token?: string; // absent en mode web (cookie httpOnly)
+  access_token?: string; 
+}
+
+export interface ApiResponseEnvelope<T> {
+  status: 'success' | 'error';
+  message: string;
+  data: T | null;
 }

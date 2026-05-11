@@ -1,148 +1,117 @@
-# **CHANGELOG**
+# CHANGELOG — main
 
-## **Branche main — Initial scaffold**
+**Sprint step** : STEP 2 + STEP 3 — Initialisation + US03/US04 (auth hybride front)
+**Branche** : `main`
 
-**Objectif** :
-Initialiser le frontend React/Vite avec le pattern classe+interface+singleton, les stores Zustand, le routing React Router et la configuration Tailwind v4.
-
-| Thème                 | Ce qui a été livré                                               | Commits |
-| :-------------------- | :--------------------------------------------------------------- | :------ |
-| Structure React       | Pages, composants, routing React Router DOM v6                   | 068f228 |
-| Pattern architectural | classe + interface + singleton sur api/ services/ utils/         | 068f228 |
-| Stores Zustand        | authStore, fileStore, tagsStore (double interface State+Actions) | 068f228 |
-| API client            | Axios + intercepteurs Bearer + 401 redirect                      | 068f228 |
-| Style                 | Tailwind CSS v4 via plugin @tailwindcss/vite                     | 068f228 |
+**Objectif** : Socle React/Vite — pattern classe+interface+singleton, stores Zustand, routing protégé, et adaptation à l'auth hybride cookie httpOnly (web) + Bearer (mobile).
 
 ---
 
-## **1. Structure + routing**
+## Ce qui est en place
 
-**Commit** : 068f228
-
-### **Ce qui a été mis en place**
-
-- React 19 + TypeScript strict + Vite 8
-- React Router DOM v6 : routes `/` (WelcomePage), `/download/:shareToken` (public), `/my-space` et `/upload` (ProtectedRoute)
-- `ProtectedRoute` : redirige vers `/` si pas de token
-
-### **Fichiers créés**
-
-- `src/App.tsx`
-- `src/views/pages/WelcomePage.tsx` · `UploadPage.tsx` · `MySpacePage.tsx` · `DownloadPage.tsx`
-- `src/views/components/shared/Navbar.tsx` · `ProtectedRoute.tsx`
-- `src/views/components/welcome/LoginForm.tsx` · `RegisterForm.tsx`
-- `src/views/components/upload/UploadForm.tsx`
-- `src/views/components/myspace/FileCard.tsx` · `FileList.tsx`
-- `src/views/components/download/DownloadForm.tsx`
+| Thème | Ce qui est opérationnel |
+| :--- | :--- |
+| Routing | React Router DOM v6 — 4 routes, `ProtectedRoute`, `ConfigPage` layout |
+| Pattern API | `class XxxApi implements IXxxApi` → `export const xxxApi` (singleton) |
+| Pattern service | `class XxxService implements IXxxService` → `export const xxxService` |
+| Stores Zustand | `authStore`, `fileStore`, `tagStore` — double interface State+Actions |
+| Auth hybride | `withCredentials: true` + token localStorage si `isMobile` uniquement |
+| Validation | `FieldValidator<T>` — classe stateless, sans hook |
+| Gestion erreurs | `catchApiError` / `getApiError` — helpers dans `serviceHelpers.ts` |
+| Styles | Tailwind CSS v4 via `@tailwindcss/vite` |
 
 ---
 
-## **2. Pattern classe+interface+singleton**
+## Choix techniques
 
-**Commit** : 068f228
+### Pattern classe+interface+singleton
 
-### **Ce qui a été mis en place**
+Chaque couche expose une interface puis une implémentation, exportée comme singleton :
 
-- Pattern uniforme : `interface IXxx` → `class Xxx implements IXxx` → `export const xxx = new Xxx()`
-- `apiClient` Axios : intercepteur requête (Bearer token) + intercepteur réponse (401 → `tokenStorage.remove()` + redirect `/`)
-- API : `userApi`, `fileApi`, `downloadApi`, `tagsApi`
-- Services : `UserService`, `FilesService`, `DownloadService`
-- Utilitaires : `TokenStorage` (clé `access_token` localStorage)
+```ts
+interface IFileApi { ... }
+class FileApi implements IFileApi { ... }
+export const fileApi = new FileApi();
+```
 
-### **Fichiers créés**
+Avantage : mockable en test, typage fort, pas de state dans la couche API.
 
-- `src/api/apiClient.ts` · `userApi.ts` · `fileApi.ts` · `downloadApi.ts` · `tagsApi.ts`
-- `src/services/UserService.ts` · `FilesService.ts` · `DownloadService.ts`
-- `src/utils/tokenStorage.ts`
-- `src/types/user.types.ts` · `file.types.ts` · `tag.types.ts`
+### Auth hybride
 
----
+`withCredentials: true` sur l'instance Axios — le cookie httpOnly est envoyé automatiquement (web).
+`authService.login()` stocke `access_token` en localStorage **uniquement** si `isMobile: true`.
+L'intercepteur 401 efface le token et redirige vers `/` dans les deux cas.
 
-## **3. Stores Zustand**
+### FieldValidator — pas de hook de validation
 
-**Commit** : 068f228
+`FieldValidator<T>` est une classe pure instanciée au niveau module (pas dans le composant).
+Pas de hook (`useFieldValidation`) — les hooks ajoutent un cycle de vie React inutile pour de la validation stateless.
 
-### **Ce qui a été mis en place**
+### serviceHelpers — gestion erreurs uniforme
 
-- Pattern double interface : `IXxxState` + `IXxxActions` → `create<IXxxState & IXxxActions>()`
-- `authStore` : `token`, `setToken()`, `clearAuth()`
-- `fileStore` : `files[]`, `setFiles()`, `addFile()`, `removeFile()`
-- `tagsStore` : `tags[]`, `setTags()`, `addTag()`, `removeTag()`
+`catchApiError(error)` — wraps les erreurs réseau/axios en `ErrorMsg`.
+`getApiError(data)` — lit `ApiResponseEnvelope.status === "error"` et retourne `ErrorMsg | null`.
+Les services ne lèvent jamais d'exception — ils retournent `ErrorMsg | T`.
 
-### **Fichiers créés**
+### Stores Zustand — double interface
 
-- `src/stores/authStore.ts`
-- `src/stores/fileStore.ts`
-- `src/stores/tagsStore.ts`
+```ts
+interface IDomainState { ... }
+interface IDomainActions { ... }
+const useDomainStore = create<IDomainState & IDomainActions>(...)
+```
 
----
-
-## **Récapitulatif final**
-
-| Thème                              | Statut |
-| :--------------------------------- | :----- |
-| Structure React + routing          | ✅     |
-| Pattern classe+interface+singleton | ✅     |
-| API client Axios (Bearer + 401)    | ✅     |
-| Stores Zustand (double interface)  | ✅     |
-| Tailwind CSS v4                    | ✅     |
-| .env.example + README              | ✅     |
+`useShallow` pour sélectionner plusieurs champs à la fois, sélecteur simple sinon.
 
 ---
 
-## **Branche feat/auth — Auth hybride (cookie httpOnly + Bearer)**
+## Structure des fichiers notables
 
-**Objectif** :
-Adapter le frontend à l'auth hybride : mode web (cookie httpOnly, pas de localStorage) et mode mobile (Bearer depuis localStorage).
-
-| Thème       | Ce qui a été livré                                   | Commits |
-| :---------- | :--------------------------------------------------- | :------ |
-| apiClient   | withCredentials: true                                | —       |
-| UserService | stocke token seulement si isMobile                   | —       |
-| authStore   | ajout user + isAuthenticated                         | —       |
-| Types       | LoginPayload + isMobile, AuthResponse user optionnel | —       |
-
----
-
-## **1. apiClient + UserService hybride**
-
-**Commit** : —
-
-### **Ce qui a été mis en place**
-
-- `withCredentials: true` sur l'instance Axios (envoie cookie httpOnly automatiquement en mode web)
-- `UserService.login()` : stocke `access_token` en localStorage **uniquement** si `isMobile: true`
-- `UserService.logout()` : appel `POST /auth/logout` + efface localStorage + reset store
-- Types mis à jour : `LoginPayload` + `isMobile?`, `AuthResponse` + `user: UserPublic`, `access_token?` optionnel
-
-### **Fichiers modifiés**
-
-- `src/api/apiClient.ts`
-- `src/services/UserService.ts`
-- `src/types/user.types.ts`
-
----
-
-## **2. authStore enrichi**
-
-**Commit** : —
-
-### **Ce qui a été mis en place**
-
-- Ajout `user: UserPublic | null` et `isAuthenticated: boolean` dans `IAuthState`
-- Actions `setUser()` + `clearAuth()` (efface token + user + localStorage)
-
-### **Fichiers modifiés**
-
-- `src/stores/authStore.ts`
+```
+src/
+  App.tsx                        — routing, ProtectedRoute, ConfigPage layout
+  api/
+    apiClient.ts                 — Axios, withCredentials, intercepteur 401
+    authApi.ts                   — IAuthApi, authApi singleton
+    fileApi.ts                   — IFileApi, fileApi singleton
+    tagApi.ts                    — ITagApi, tagApi singleton (singulier)
+    downloadApi.ts               — IDownloadApi, downloadApi singleton
+  services/
+    authService.ts               — login(), register(), logout()
+    fileService.ts               — getMyFiles(), uploadFile(), deleteFile()
+    serviceHelpers.ts            — catchApiError, getApiError
+  stores/
+    authStore.ts                 — IAuthState + IAuthActions, useAuthStore
+    fileStore.ts                 — IFileState + IFileActions, useFileStore
+    tagStore.ts                  — ITagState + ITagActions, useTagStore (singulier)
+  utils/
+    tokenStorage.ts              — TokenStorage, tokenStorage singleton
+    fieldValidation.ts           — FieldValidator<T> classe stateless
+    authValidation.ts            — validateLoginField, validateRegisterField
+    mockFiles.ts                 — FILE_STATUS as const, IFile, TFileStatus
+  views/
+    components/
+      routing/
+        ProtectedRoute.tsx       — redirige vers / si non authentifié
+        ConfigPage.tsx           — layout commun (Navbar + Sidebar + outlet)
+        UploadRoute.tsx
+      shared/
+        Navbar.tsx · Sidebar.tsx · Switch.tsx · ContextMenu.tsx
+        UploadButton.tsx · UploadCall.tsx
+      myspace/
+        FileCard.tsx
+      upload/
+        UploadForm.tsx
+      welcome/
+        LoginForm.tsx · RegisterForm.tsx
+      download/
+        DownloadForm.tsx
+```
 
 ---
 
-## **Récapitulatif final**
+## Variables d'environnement requises
 
-| Thème                             | Statut |
-| :-------------------------------- | :----- |
-| apiClient withCredentials         | —      |
-| UserService login hybride         | —      |
-| authStore user + isAuthenticated  | —      |
-| Types LoginPayload + AuthResponse | —      |
+```env
+VITE_API_URL=http://localhost:3000/api/v1
+```

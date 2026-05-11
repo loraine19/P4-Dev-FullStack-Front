@@ -11,7 +11,7 @@ L'application propose :
 - **Upload** (`/upload`) — sélection du fichier, durée d'expiration, mot de passe optionnel, tags
 - **Téléchargement** (`/download/:shareToken`) — page publique accessible sans compte, saisie du mot de passe si protégé
 
-L'authentification est gérée via **Bearer Token JWT** (stocké en localStorage). Un intercepteur Axios redirige automatiquement vers `/` en cas de token expiré (réponse 401).
+L'authentification est gérée via **cookie httpOnly** (mode web — posé par le serveur, jamais accessible en JS) ou **Bearer Token JWT en localStorage** (mode mobile uniquement). Un intercepteur Axios redirige automatiquement vers `/` en cas de token expiré (réponse 401).
 
 ## Stack technique
 
@@ -30,25 +30,23 @@ L'authentification est gérée via **Bearer Token JWT** (stocké en localStorage
 ```
 src/
 ├── api/
-│   ├── apiClient.ts      ← Axios (baseURL, Bearer, interceptor 401)
-│   ├── userApi.ts        ← IUserApi + UserApi (login / register)
+│   ├── apiClient.ts      ← Axios (baseURL, withCredentials, interceptor 401)
+│   ├── authApi.ts        ← IAuthApi + AuthApi (login / register / logout)
 │   ├── fileApi.ts        ← IFileApi + FileApi (getAll / upload / remove)
 │   ├── downloadApi.ts    ← IDownloadApi + DownloadApi (getMeta / download)
-│   └── tagsApi.ts        ← ITagApi + TagApi (getAll / create / remove)
+│   └── tagApi.ts         ← ITagApi + TagApi (getAll / create / remove)
 ├── services/
-│   ├── UserService.ts    ← login(), register(), logout()
-│   ├── FilesService.ts   ← getMyFiles(), uploadFile(), deleteFile()
-│   └── DownloadService.ts← getMeta(), download()
+│   ├── authService.ts    ← login(), register(), logout()
+│   ├── fileService.ts    ← getMyFiles(), uploadFile(), deleteFile()
+│   └── serviceHelpers.ts ← catchApiError, getApiError
 ├── stores/
-│   ├── authStore.ts      ← IAuthState + IAuthActions | token
+│   ├── authStore.ts      ← IAuthState + IAuthActions | user, isAuthenticated
 │   ├── fileStore.ts      ← IFileState + IFileActions | files[]
-│   └── tagsStore.ts      ← ITagsState + ITagsActions | tags[]
-├── types/
-│   ├── user.types.ts     ← User, LoginPayload, RegisterPayload, AuthResponse
-│   ├── file.types.ts     ← FileItem, DownloadMeta
-│   └── tag.types.ts      ← Tag
+│   └── tagStore.ts       ← ITagState + ITagActions | tags[]
 ├── utils/
-│   └── tokenStorage.ts   ← ITokenStorage + TokenStorage (localStorage)
+│   ├── tokenStorage.ts   ← TokenStorage singleton (localStorage, mobile only)
+│   ├── fieldValidation.ts← FieldValidator<T> classe stateless
+│   └── authValidation.ts ← validateLoginField, validateRegisterField
 └── views/
     ├── pages/
     │   ├── WelcomePage.tsx    ← Login / Register (switch)
