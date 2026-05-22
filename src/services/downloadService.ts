@@ -15,7 +15,7 @@ class DownloadService implements IDownloadService {
   async getMeta(shareToken: string): Promise<DownloadMeta | ErrorMsg> {
     try {
       const res = await downloadApi.getMeta(shareToken);
-      return res.data;
+      return res.data.data as DownloadMeta;
     } catch (error) {
       return catchApiError(error);
     }
@@ -25,9 +25,9 @@ class DownloadService implements IDownloadService {
   async download(shareToken: string, password?: string): Promise<void | ErrorMsg> {
     try {
       const res = await downloadApi.download(shareToken, password);
-      const blob = new Blob([res.data], { type: res.headers['content-type'] });
+      const blob = new Blob([res.data], { type: res.headers['content-type'] as string });
       const url = URL.createObjectURL(blob);
-      const disposition: string = res.headers['content-disposition'] ?? '';
+      const disposition: string = (res.headers['content-disposition'] as string) ?? '';
       const match = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"'\n]+)/i);
       const filename = match?.[1] ?? 'fichier';
       const a = document.createElement('a');

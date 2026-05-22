@@ -1,42 +1,102 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../shared/Button';
-import InputField from '../shared/InputField';
-import SelectField from '../shared/SelectField';
+import InputField from '../shared/forms/InputField';
+import SelectField from '../shared/forms/SelectField';
 import TagComponent from '../shared/TagComponent';
+import Callout from '../shared/Callout';
+import { fileService } from '../../../services/fileService';
+import { tagService } from '../../../services/tagService';
+import useFileStore from '../../../stores/fileStore';
+import type { Tag } from '../../../types/tag.types';
+import type { ErrorMsg } from '../../../types/error.types';
 
-/* EXISTING TAGS */
-const EXISTING_TAGS = ['design', 'client', 'facture', 'urgent', 'contract', 'media'];
+/* EXPIRATION OPTIONS (in days) */
+const EXPIRATION_OPTIONS = [
+  { value: '1', label: '1 jour' },
+  { value: '7', label: '7 jours' },
+  { value: '30', label: '30 jours' },
+];
 
 /* UPLOAD FORM */
 const UploadForm = () => {
+  const navigate = useNavigate();
+  const addFile = useFileStore((s) => s.addFile);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [password, setPassword] = useState('');
+  const [expirationDays, setExpirationDays] = useState('7');
   const [tagInput, setTagInput] = useState('');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTagNames, setSelectedTagNames] = useState<string[]>([]);
+  const [userTags, setUserTags] = useState<Tag[]>([]);
+  const [error, setError] = useState<ErrorMsg | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  /* LOAD TAGS */
+  useEffect(() => {
+    tagService.getAll().then((result) => {
+      if (Array.isArray(result)) setUserTags(result);
+    });
+  }, []);
 
   /* TAG ACTIONS */
   const normalizedTag = useMemo(() => tagInput.trim().toLowerCase(), [tagInput]);
+  const tagSuggestions = useMemo(() => userTags.map((t) => t.name), [userTags]);
 
   const handleAddTag = () => {
-    if (!normalizedTag) return;
-    if (selectedTags.includes(normalizedTag)) return;
-
-    setSelectedTags((currentTags) => [...currentTags, normalizedTag]);
+    if (!normalizedTag || selectedTagNames.includes(normalizedTag)) return;
+    setSelectedTagNames((prev) => [...prev, normalizedTag]);
     setTagInput('');
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setSelectedTags((currentTags) => currentTags.filter((tag) => tag !== tagToRemove));
+    setSelectedTagNames((prev) => prev.filter((t) => t !== tagToRemove));
+  };
+
+  /* SUBMIT */
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    const file = selectedFile;
+    if (!file) {
+      setError({ message: 'Veuillez sélectionner un fichier.', level: 'error' });
+      return;
+    }
+
+    const tagIds = selectedTagNames
+      .map((name) => userTags.find((t) => t.name === name)?.id)
+      .filter((id): id is number => id !== undefined);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('expirationDays', expirationDays);
+    if (password) formData.append('downloadPassword', password);
+    tagIds.forEach((id) => formData.append('tags', String(id)));
+
+    setLoading(true);
+    const result = await fileService.uploadFile(formData);
+    setLoading(false);
+
+    if (result && 'level' in result) {
+      setError(result);
+      return;
+    }
+    if (result) addFile(result);
+    navigate('/my-space');
   };
 
   return (
     <section className="card center-block sheet-mobile" aria-label="Formulaire d'upload">
       <h2 className="card-title">Uploader un fichier</h2>
 
-      <form className="form-grid">
+      <form className="form-grid" onSubmit={handleSubmit}>
+        {error && <Callout error={error} />}
+
         <InputField
           id="upload-file"
           label="Fichier"
           type="file"
           inputClassName="form-file"
+          onChange={(e) => setSelectedFile((e.target as HTMLInputElement).files?.[0] ?? null)}
         />
 
         <div className="grid-2">
@@ -44,13 +104,9 @@ const UploadForm = () => {
             id="upload-expiration"
             className="grid-1"
             label="Durée d'expiration"
-            defaultValue="24h"
-            options={[
-              { value: '1h', label: '1 heure' },
-              { value: '24h', label: '24 heures' },
-              { value: '7d', label: '7 jours' },
-              { value: '30d', label: '30 jours' },
-            ]}
+            value={expirationDays}
+            onChange={(e) => setExpirationDays(e.target.value)}
+            options={EXPIRATION_OPTIONS}
           />
 
           <InputField
@@ -60,6 +116,8 @@ const UploadForm = () => {
             type="password"
             placeholder="Ajouter un mot de passe"
             autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
@@ -68,14 +126,16 @@ const UploadForm = () => {
           label="Tags"
           value={tagInput}
           onChange={setTagInput}
-          suggestions={EXISTING_TAGS}
-          tags={selectedTags}
+          suggestions={tagSuggestions}
+          tags={selectedTagNames}
           onAdd={handleAddTag}
           onRemove={handleRemoveTag}
           placeholder="design, client, facture"
         />
 
-        <Button variant="primary">Générer un lien de partage</Button>
+        <Button variant="primary" disabled={loading}>
+          {loading ? 'Upload en cours…' : 'Générer un lien de partage'}
+        </Button>
       </form>
     </section>
   );

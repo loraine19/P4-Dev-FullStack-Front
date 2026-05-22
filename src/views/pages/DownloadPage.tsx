@@ -1,9 +1,12 @@
+import { useParams } from 'react-router-dom';
 import Navbar from '../components/shared/Navbar';
 import DownloadForm from '../components/download/DownloadForm';
 import PageHeader from '../components/shared/PageHeader';
 
 /* DOWNLOAD PAGE */
 const DownloadPage = () => {
+  const { shareToken } = useParams<{ shareToken: string }>();
+
   return (
     <main className="app-gradient">
       <section className="app-shell">
@@ -15,7 +18,7 @@ const DownloadPage = () => {
                 title="Lien de téléchargement"
                 subtitle="Télécharge le fichier partagé. Le lien peut expirer automatiquement."
               />
-            <DownloadForm />
+            <DownloadForm shareToken={shareToken ?? ''} />
           </div>
         </section>
       </section>

@@ -1,23 +1,35 @@
-export type TFieldErrors<T extends string> = Partial<Record<T, string>>;
-export type TFieldValues<T extends string> = Record<T, string>;
-export type TValidateField<T extends string> = (field: T, value: string, values: TFieldValues<T>) => string;
+/* TYPES */
+export type Rule = {
+  test: (value: string, values?: Record<string, string>) => boolean;
+  message: string;
+};
 
-/* FIELD VALIDATOR */
-// stateless validator — field error state stays in the component (useState)
-export class FieldValidator<T extends string> {
-  constructor(private readonly validateField: TValidateField<T>) {}
+export type FieldRules<T extends string> = Record<T, Rule[]>;
+export type FieldValues<T extends string> = Record<T, string>;
+export type FieldErrors<T extends string> = Partial<Record<T, string>>;
 
-  /* VALIDATE ONE */
-  validateOne(field: T, value: string, values: TFieldValues<T>): string {
-    return this.validateField(field, value, values);
+/* VALIDATE */
+// runs rules in order, returns first error message or ''
+export const validate = (
+  value: string,
+  rules: Rule[],
+  values?: Record<string, string>,
+): string => {
+  for (const rule of rules) {
+    if (!rule.test(value, values)) return rule.message;
   }
+  return '';
+};
 
-  /* VALIDATE ALL */
-  validateAll(values: TFieldValues<T>): TFieldErrors<T> {
-    const errors = {} as TFieldErrors<T>;
-    (Object.keys(values) as T[]).forEach((field) => {
-      errors[field] = this.validateField(field, values[field], values);
-    });
-    return errors;
-  }
-}
+/* VALIDATE ALL */
+// validates all fields at once, returns { field: errorMsg }
+export const validateAll = <T extends string>(
+  values: FieldValues<T>,
+  rules: FieldRules<T>,
+): FieldErrors<T> => {
+  const errors = {} as FieldErrors<T>;
+  (Object.keys(values) as T[]).forEach((field) => {
+    errors[field] = validate(values[field], rules[field] ?? [], values);
+  });
+  return errors;
+};

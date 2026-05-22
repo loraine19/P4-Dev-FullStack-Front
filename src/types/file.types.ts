@@ -1,15 +1,13 @@
-import type { Tag } from './tag.types';
-
 export interface FileItem {
   id: number;
-  filename: string;
   originalName: string;
   size: number;
   mimeType: string;
   shareToken: string;
+  passwordProtected: boolean;
   expiresAt: string;
   createdAt: string;
-  tags: Tag[];
+  tags: { id: number; name: string }[];
 }
 
 export interface DownloadMeta {

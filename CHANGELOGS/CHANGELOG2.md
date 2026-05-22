@@ -1,7 +1,7 @@
-# CHANGELOG — main
+# CHANGELOG — feat/auth
 
 **Sprint step** : STEP 3 — US03/US04 (shell complet + auth front end-to-end)
-**Branche** : `main`
+**Branche** : `feat/auth`
 
 **Objectif** : Shell React complet — routing protégé, auth hybride cookie/Bearer branchée et testée manuellement, bibliothèque de composants UI, workflow upload, MySpace avec mock data. Cypress prévu pour clore l'étape.
 

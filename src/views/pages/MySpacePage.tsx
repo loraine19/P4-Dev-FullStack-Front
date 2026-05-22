@@ -1,11 +1,13 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/shared/Sidebar';
 import Switch from '../components/shared/Switch';
 import Button from '../components/shared/Button';
 import FileCard from '../components/myspace/FileCard';
-import generateMockFiles, { FILE_STATUS } from '../../utils/mockFiles';
 import useAuthStore from '../../stores/authStore';
+import useFileStore from '../../stores/fileStore';
+import { fileService } from '../../services/fileService';
+import type { FileItem } from '../../types/file.types';
 
 /* FILTER CONSTANTS */
 const FILTER_TYPE = {
@@ -18,9 +20,16 @@ const FILTER_TYPE = {
 const MySpacePage = () => {
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
+  const { files, setFiles, removeFile } = useFileStore();
   const [activeFilter, setActiveFilter] = useState<typeof FILTER_TYPE[keyof typeof FILTER_TYPE]>(FILTER_TYPE.ALL);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
-  const [files] = useState(generateMockFiles());
+
+  /* LOAD FILES */
+  useEffect(() => {
+    fileService.getMyFiles().then((result) => {
+      if (Array.isArray(result)) setFiles(result);
+    });
+  }, [setFiles]);
 
   /* FILTER TABS */
   const filterTabs = [
@@ -32,15 +41,15 @@ const MySpacePage = () => {
   /* GET FILTERED FILES */
   const filteredFiles = useMemo(() => {
     if (activeFilter === FILTER_TYPE.ALL) return files;
-    if (activeFilter === FILTER_TYPE.ACTIVE) return files.filter((f) => f.status === FILE_STATUS.ACTIVE);
-    if (activeFilter === FILTER_TYPE.EXPIRED) return files.filter((f) => f.status === FILE_STATUS.EXPIRED);
+    if (activeFilter === FILTER_TYPE.ACTIVE) return files.filter((f) => new Date(f.expiresAt) > new Date());
+    if (activeFilter === FILTER_TYPE.EXPIRED) return files.filter((f) => new Date(f.expiresAt) <= new Date());
     return files;
   }, [files, activeFilter]);
 
   /* FORMAT EXPIRY TEXT */
-  const getExpiryText = (expiresAt: Date): string => {
+  const getExpiryText = (expiresAt: string): string => {
     const now = new Date();
-    const diffMs = expiresAt.getTime() - now.getTime();
+    const diffMs = new Date(expiresAt).getTime() - now.getTime();
     const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
 
     if (diffDays < 0) return 'Expiré';
@@ -50,13 +59,14 @@ const MySpacePage = () => {
   };
 
   /* HANDLE DELETE */
-  const handleDeleteFile = (_fileId: string) => {
-    // TODO: implement delete API call
+  const handleDeleteFile = async (fileId: number) => {
+    await fileService.deleteFile(fileId);
+    removeFile(fileId);
   };
 
   /* HANDLE DOWNLOAD */
-  const handleDownloadFile = (_fileId: string) => {
-    // TODO: implement download API call
+  const handleDownloadFile = (file: FileItem) => {
+    navigate(`/download/${file.shareToken}`);
   };
 
   /* HANDLE ADD FILES */
@@ -100,7 +110,9 @@ const MySpacePage = () => {
           <Button variant="dark" onClick={handleAddFiles}>
             Ajouter des fichiers
           </Button>
-          <Button variant="text" onClick={handleLogout}>
+          <Button
+            variant="text"
+            onClick={handleLogout}>
             Déconnexion
           </Button>
         </div>

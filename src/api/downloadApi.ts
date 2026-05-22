@@ -1,9 +1,10 @@
 import apiClient from './apiClient';
 import type { DownloadMeta } from '../types/file.types';
+import type { ApiResponseEnvelope } from '../types/user.types';
 
 /* IDOWNLOAD API INTERFACE */
 interface IDownloadApi {
-  getMeta(shareToken: string): Promise<import('axios').AxiosResponse<DownloadMeta>>;
+  getMeta(shareToken: string): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<DownloadMeta>>>;
   download(shareToken: string, password?: string): Promise<import('axios').AxiosResponse<Blob>>;
 }
 
@@ -11,7 +12,7 @@ interface IDownloadApi {
 class DownloadApi implements IDownloadApi {
   /* GET META */
   getMeta(shareToken: string) {
-    return apiClient.get<DownloadMeta>(`/download/${shareToken}`);
+    return apiClient.get<ApiResponseEnvelope<DownloadMeta>>(`/download/${shareToken}`);
   }
 
   /* DOWNLOAD */

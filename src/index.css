@@ -485,6 +485,7 @@ h1 {
     font-weight: 700;
     height: 2.35rem;
     cursor: pointer;
+    padding: 0.5rem;
     transition: background-color 0.2s ease;
 }
 

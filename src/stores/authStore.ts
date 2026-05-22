@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { tokenStorage } from '../utils/tokenStorage';
+import { tokenStorage } from '../infrastructure/tokenStorage';
 import { authService } from '../services/authService';
 import type { UserPublic, LoginPayload, RegisterPayload } from '../types/user.types';
 import type { ErrorMsg } from '../types/error.types';

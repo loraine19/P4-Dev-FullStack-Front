@@ -1,5 +1,5 @@
 import { authApi } from '../api/authApi';
-import { tokenStorage } from '../utils/tokenStorage';
+import { tokenStorage } from '../infrastructure/tokenStorage';
 import type { LoginPayload, RegisterPayload, UserPublic } from '../types/user.types';
 import type { ErrorMsg } from '../types/error.types';
 import { catchApiError, getApiError } from './serviceHelpers';
