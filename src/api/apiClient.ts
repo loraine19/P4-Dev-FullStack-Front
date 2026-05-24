@@ -25,7 +25,10 @@ apiClient.interceptors.response.use(
     const requestUrl = isAxios ? error.config?.url ?? '' : '';
     const isLoginRequest = requestUrl.includes('/auth/login');
 
-    if (status === 401) {
+    // download endpoint uses 401 for wrong password — public route, not a session error
+    const isDownloadRequest = requestUrl.includes('/download/');
+
+    if (status === 401 && !isDownloadRequest) {
       tokenStorage.remove();
       if (!isLoginRequest) {
         window.location.href = '/';
