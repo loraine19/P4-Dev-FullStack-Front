@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "lib": ["ES2022", "DOM"],
+        "module": "ES2022",
+        "moduleResolution": "node",
+        "ignoreDeprecations": "6.0",
+        "types": ["cypress"],
+        "skipLibCheck": true,
+        "noEmit": true,
+        "strict": true,
+        "moduleDetection": "force"
+    },
+    "include": ["./**/*.ts"]
+}
