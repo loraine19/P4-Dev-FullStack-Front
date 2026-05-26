@@ -68,6 +68,7 @@ const UploadForm = () => {
       .map((name) => userTags.find((t) => t.name === name)?.id)
       .filter((id): id is number => id !== undefined);
 
+    // move to service: FormData construction belongs in uploadService, not in the component
     const formData = new FormData();
     formData.append('file', file);
     formData.append('expirationDays', expirationDays);

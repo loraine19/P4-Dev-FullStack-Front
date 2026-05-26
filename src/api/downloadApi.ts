@@ -17,6 +17,7 @@ class DownloadApi implements IDownloadApi {
 
   /* DOWNLOAD */
   download(shareToken: string, password?: string) {
+    // responseType: 'blob' — Axios parses binary response as Blob instead of trying to JSON.parse it
     return apiClient.post<Blob>(`/download/${shareToken}`, { password }, { responseType: 'blob' });
   }
 }
