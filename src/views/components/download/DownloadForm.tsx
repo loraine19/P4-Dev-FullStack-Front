@@ -43,8 +43,6 @@ const DownloadForm = ({ shareToken }: IDownloadFormProps) => {
 
   return (
     <section className="card center-block" aria-label="Formulaire de téléchargement">
-      <h2 className="card-title">Télécharger le fichier</h2>
-
       {metaError && <Callout error={metaError} />}
 
       {meta && (
@@ -68,7 +66,7 @@ const DownloadForm = ({ shareToken }: IDownloadFormProps) => {
 
           {downloadError && <Callout error={downloadError} />}
 
-          <Button variant="secondary" disabled={loading}>
+          <Button type="submit" variant="secondary" disabled={loading}>
             {loading ? 'Téléchargement…' : 'Télécharger'}
           </Button>
         </form>

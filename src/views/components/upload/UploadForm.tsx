@@ -14,8 +14,10 @@ import type { ErrorMsg } from '../../../types/error.types';
 /* EXPIRATION OPTIONS (in days) */
 const EXPIRATION_OPTIONS = [
   { value: '1', label: '1 jour' },
+  { value: '2', label: '2 jours' },
+  { value: '3', label: '3 jours' },
+  { value: '5', label: '5 jours' },
   { value: '7', label: '7 jours' },
-  { value: '30', label: '30 jours' },
 ];
 
 /* UPLOAD FORM */
@@ -133,7 +135,7 @@ const UploadForm = () => {
           placeholder="design, client, facture"
         />
 
-        <Button variant="primary" disabled={loading}>
+        <Button type="submit" variant="primary" disabled={loading}>
           {loading ? 'Upload en cours…' : 'Générer un lien de partage'}
         </Button>
       </form>

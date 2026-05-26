@@ -31,22 +31,24 @@ L'authentification est gérée via **cookie httpOnly** (mode web — posé par l
 src/
 ├── api/
 │   ├── apiClient.ts      ← Axios (baseURL, withCredentials, interceptor 401)
-│   ├── authApi.ts        ← IAuthApi + AuthApi (login / register / logout)
-│   ├── fileApi.ts        ← IFileApi + FileApi (getAll / upload / remove)
-│   ├── downloadApi.ts    ← IDownloadApi + DownloadApi (getMeta / download)
-│   └── tagApi.ts         ← ITagApi + TagApi (getAll / create / remove)
+│   ├── authApi.ts        ← login / register / logout
+│   ├── fileApi.ts        ← getAll / upload / remove
+│   ├── downloadApi.ts    ← getMeta / download
+│   └── tagApi.ts         ← getAll / create / remove
+├── infrastructure/
+│   └── tokenStorage.ts   ← localStorage (mode mobile uniquement — web = cookie httpOnly)
 ├── services/
 │   ├── authService.ts    ← login(), register(), logout()
 │   ├── fileService.ts    ← getMyFiles(), uploadFile(), deleteFile()
+│   ├── downloadService.ts← getMetadata(), downloadFile()
+│   ├── tagService.ts     ← getTags(), createTag(), deleteTag()
 │   └── serviceHelpers.ts ← catchApiError, getApiError
 ├── stores/
-│   ├── authStore.ts      ← IAuthState + IAuthActions | user, isAuthenticated
-│   ├── fileStore.ts      ← IFileState + IFileActions | files[]
-│   └── tagStore.ts       ← ITagState + ITagActions | tags[]
+│   ├── authStore.ts      ← user, isAuthenticated
+│   ├── fileStore.ts      ← files[]
+│   └── tagStore.ts       ← tags[]
 ├── utils/
-│   ├── tokenStorage.ts   ← TokenStorage singleton (localStorage, mobile only)
-│   ├── fieldValidation.ts← FieldValidator<T> classe stateless
-│   └── authValidation.ts ← validateLoginField, validateRegisterField
+│   └── fieldValidation.ts← FieldValidator<T> classe stateless
 └── views/
     ├── pages/
     │   ├── WelcomePage.tsx    ← Login / Register (switch)
@@ -55,13 +57,15 @@ src/
     │   └── DownloadPage.tsx   ← Téléchargement public via shareToken
     └── components/
         ├── shared/
-        │   ├── Navbar.tsx
-        │   └── ProtectedRoute.tsx
+        │   ├── Navbar.tsx · ProtectedRoute.tsx · Button.tsx · Callout.tsx
+        │   ├── Footer.tsx · Sidebar.tsx · PageHeader.tsx · TagComponent.tsx
+        │   └── forms/ (Form.tsx · InputField.tsx · SelectField.tsx)
+        ├── routing/
+        │   ├── ProtectedRoute.tsx · UploadRoute.tsx · ConfigPage.tsx
         ├── welcome/
         │   ├── LoginForm.tsx
         │   └── RegisterForm.tsx
         ├── myspace/
-        │   ├── FileList.tsx
         │   └── FileCard.tsx
         ├── upload/
         │   └── UploadForm.tsx
