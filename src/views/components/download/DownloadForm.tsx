@@ -49,7 +49,7 @@ const DownloadForm = ({ shareToken }: IDownloadFormProps) => {
         <form className="form-grid" onSubmit={handleSubmit}>
           <Callout
             variant="info"
-            message={`Fichier : ${meta.filename} — ${(meta.size / 1024).toFixed(1)} Ko`}
+            message={`Fichier : ${meta.filename} -  ${(meta.size / 1024).toFixed(1)} Ko`}
           />
 
           {meta.requiresPassword && (

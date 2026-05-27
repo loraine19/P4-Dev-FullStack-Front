@@ -1,7 +1,7 @@
 import type { ErrorMsg } from '../types/error.types';
 import type { ApiResponseEnvelope } from '../types/user.types';
 
-// resilience: handles HTTP 200 with { status: 'error' } — backend currently always throws 4xx/5xx,
+// resilience: handles HTTP 200 with { status: 'error' } -  backend currently always throws 4xx/5xx,
 // but this guard future-proofs soft-error patterns without silent failures
 export const getApiError = (res: ApiResponseEnvelope<unknown>): ErrorMsg | null =>
   res.status === 'error'

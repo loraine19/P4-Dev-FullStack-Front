@@ -49,7 +49,7 @@ class AuthService implements IAuthService {
   }
 
   /* GET USER */
-  // delegated to the store — stub kept for interface compliance
+  // delegated to the store -  stub kept for interface compliance
   getUser(): UserPublic | null {
     return null;
   }

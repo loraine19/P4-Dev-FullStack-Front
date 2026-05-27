@@ -1,18 +1,10 @@
 import { useShallow } from 'zustand/react/shallow';
 import useAuthStore from '../../../stores/authStore';
-import { RULES } from '../../../constants/validationRules';
+import { REGISTER_INPUTS, type TRegisterField } from '../../../constants/formConfigs';
 import type { FieldValues } from '../../../utils/fieldValidation';
 import Form from '../shared/forms/Form';
 import SwitchText from '../shared/SwitchText';
 
-type TRegisterField = 'name' | 'email' | 'password' | 'passwordConfirm';
-
-const REGISTER_INPUTS = [
-  { name: 'name' as TRegisterField,            label: 'Nom',                          type: 'text',     autoComplete: 'name',         rules: [RULES.required('Nom requis')] },
-  { name: 'email' as TRegisterField,           label: 'Email',                        type: 'email',    autoComplete: 'email',        rules: [RULES.required('Email requis'), RULES.email('Format email invalide')] },
-  { name: 'password' as TRegisterField,        label: 'Mot de passe',                 type: 'password', autoComplete: 'new-password', rules: [RULES.required('Mot de passe requis'), RULES.minLen(8, '8 caractères min.')] },
-  { name: 'passwordConfirm' as TRegisterField, label: 'Vérification du mot de passe', type: 'password', autoComplete: 'new-password', rules: [RULES.required('Confirmation requise'), RULES.matches('password', 'Les mots de passe ne correspondent pas')] },
-];
 
 /* REGISTER FORM PROPS */
 interface IRegisterFormProps {

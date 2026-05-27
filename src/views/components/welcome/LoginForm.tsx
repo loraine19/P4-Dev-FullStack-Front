@@ -1,17 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useShallow } from 'zustand/react/shallow';
 import useAuthStore from '../../../stores/authStore';
-import { RULES } from '../../../constants/validationRules';
+import { LOGIN_INPUTS, type TLoginField } from '../../../constants/formConfigs';
 import type { FieldValues } from '../../../utils/fieldValidation';
 import Form from '../shared/forms/Form';
 import SwitchText from '../shared/SwitchText';
-
-type TLoginField = 'email' | 'password';
-
-const LOGIN_INPUTS = [
-  { name: 'email' as TLoginField,    label: 'Email',          type: 'email',    autoComplete: 'email',            rules: [RULES.required('Email requis'), RULES.email('Format email invalide')] },
-  { name: 'password' as TLoginField, label: 'Mot de passe',   type: 'password', autoComplete: 'current-password', rules: [RULES.required('Mot de passe requis')] },
-];
 
 /* LOGIN FORM PROPS */
 interface ILoginFormProps {

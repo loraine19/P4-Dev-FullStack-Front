@@ -34,7 +34,7 @@ class DownloadService implements IDownloadService {
       // extract filename from: attachment; filename*=UTF-8''mon%20fichier.pdf
       const match = disposition.match(/filename\*?=(?:UTF-8'')?["']?([^;"'\n]+)/i);
       const filename = match?.[1] ?? 'fichier';
-      // invisible <a> — never appended to DOM
+      // invisible <a> -  never appended to DOM
       const a = document.createElement('a');
       a.href = url;
       // native HTML attr: forces download instead of navigation, sets the saved filename
