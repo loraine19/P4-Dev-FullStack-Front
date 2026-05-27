@@ -7,6 +7,7 @@ import { catchApiError } from './serviceHelpers';
 interface IFileService {
   getMyFiles(): Promise<FileItem[] | ErrorMsg>;
   uploadFile(formData: FormData): Promise<FileItem | ErrorMsg | null>;
+  uploadFileAnonymous(formData: FormData): Promise<FileItem | ErrorMsg | null>;
   deleteFile(id: number): Promise<void>;
 }
 
@@ -26,6 +27,16 @@ class FileService implements IFileService {
   async uploadFile(formData: FormData): Promise<FileItem | ErrorMsg | null> {
     try {
       const res = await fileApi.upload(formData);
+      return res.data.data;
+    } catch (error) {
+      return catchApiError(error);
+    }
+  }
+
+  /* UPLOAD FILE ANONYMOUS */
+  async uploadFileAnonymous(formData: FormData): Promise<FileItem | ErrorMsg | null> {
+    try {
+      const res = await fileApi.uploadAnonymous(formData);
       return res.data.data;
     } catch (error) {
       return catchApiError(error);

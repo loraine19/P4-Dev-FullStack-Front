@@ -8,6 +8,7 @@ import Callout from '../shared/Callout';
 import { fileService } from '../../../services/fileService';
 import { tagService } from '../../../services/tagService';
 import useFileStore from '../../../stores/fileStore';
+import useAuthStore from '../../../stores/authStore';
 import type { Tag } from '../../../types/tag.types';
 import type { ErrorMsg } from '../../../types/error.types';
 
@@ -24,6 +25,7 @@ const EXPIRATION_OPTIONS = [
 const UploadForm = () => {
   const navigate = useNavigate();
   const addFile = useFileStore((s) => s.addFile);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
   const [expirationDays, setExpirationDays] = useState('7');
@@ -32,6 +34,7 @@ const UploadForm = () => {
   const [userTags, setUserTags] = useState<Tag[]>([]);
   const [error, setError] = useState<ErrorMsg | null>(null);
   const [loading, setLoading] = useState(false);
+  const [shareToken, setShareToken] = useState<string | null>(null);
 
   /* LOAD TAGS */
   useEffect(() => {
@@ -54,7 +57,7 @@ const UploadForm = () => {
       return;
     }
     const result = await tagService.create(tagInput.trim());
-    if ('level' in result) return;
+    if ('level' in result) { setError(result); return; }
     setUserTags((prev) => [...prev, result]);
     setSelectedTagNames((prev) => [...prev, result.name]);
     setTagInput('');
@@ -86,15 +89,23 @@ const UploadForm = () => {
     tagIds.forEach((id) => formData.append('tags', String(id)));
 
     setLoading(true);
-    const result = await fileService.uploadFile(formData);
+    const result = isAuthenticated
+      ? await fileService.uploadFile(formData)
+      : await fileService.uploadFileAnonymous(formData);
     setLoading(false);
 
     if (result && 'level' in result) {
       setError(result);
       return;
     }
-    if (result) addFile(result);
-    navigate('/my-space');
+    if (result) {
+      if (isAuthenticated) {
+        addFile(result);
+        navigate('/my-space');
+      } else {
+        setShareToken(result.shareToken);
+      }
+    }
   };
 
   return (
@@ -150,6 +161,13 @@ const UploadForm = () => {
           {loading ? 'Upload en cours…' : 'Générer un lien de partage'}
         </Button>
       </form>
+
+      {shareToken && (
+        <div className="share-link-block" aria-label="Lien de partage">
+          <p>Votre lien de partage :</p>
+          <a href={`/download/${shareToken}`}>{window.location.origin}/download/{shareToken}</a>
+        </div>
+      )}
     </section>
   );
 };

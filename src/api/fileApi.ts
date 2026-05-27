@@ -6,6 +6,7 @@ import type { ApiResponseEnvelope } from '../types/user.types';
 interface IFileApi {
   getAll(): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<FileItem[]>>>;
   upload(formData: FormData): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<FileItem>>>;
+  uploadAnonymous(formData: FormData): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<FileItem>>>;
   remove(id: number): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<null>>>;
 }
 
@@ -19,6 +20,13 @@ class FileApi implements IFileApi {
   /* UPLOAD */
   upload(formData: FormData) {
     return apiClient.post<ApiResponseEnvelope<FileItem>>('/files', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  }
+
+  /* UPLOAD ANONYMOUS */
+  uploadAnonymous(formData: FormData) {
+    return apiClient.post<ApiResponseEnvelope<FileItem>>('/files/anonymous', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   }
