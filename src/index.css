@@ -786,6 +786,12 @@ h1 {
     cursor: pointer;
 }
 
+.chip-active {
+    background: #2c2831;
+    color: #fff;
+    border-color: #2c2831;
+}
+
 .tag-row {
     display: grid;
     grid-template-columns: 1fr auto;

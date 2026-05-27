@@ -23,6 +23,7 @@ const MySpacePage = () => {
   const { files, setFiles, removeFile } = useFileStore();
   const [activeFilter, setActiveFilter] = useState<typeof FILTER_TYPE[keyof typeof FILTER_TYPE]>(FILTER_TYPE.ALL);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
 
   /* LOAD FILES */
   useEffect(() => {
@@ -39,12 +40,19 @@ const MySpacePage = () => {
   ];
 
   /* GET FILTERED FILES */
+  const availableTags = useMemo(() => {
+    const map = new Map<number, string>();
+    files.forEach((f) => f.tags.forEach((t) => map.set(t.id, t.name)));
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [files]);
+
   const filteredFiles = useMemo(() => {
-    if (activeFilter === FILTER_TYPE.ALL) return files;
-    if (activeFilter === FILTER_TYPE.ACTIVE) return files.filter((f) => new Date(f.expiresAt) > new Date());
-    if (activeFilter === FILTER_TYPE.EXPIRED) return files.filter((f) => new Date(f.expiresAt) <= new Date());
-    return files;
-  }, [files, activeFilter]);
+    let result = files;
+    if (activeFilter === FILTER_TYPE.ACTIVE) result = result.filter((f) => new Date(f.expiresAt) > new Date());
+    if (activeFilter === FILTER_TYPE.EXPIRED) result = result.filter((f) => new Date(f.expiresAt) <= new Date());
+    if (selectedTagIds.length > 0) result = result.filter((f) => f.tags.some((t) => selectedTagIds.includes(t.id)));
+    return result;
+  }, [files, activeFilter, selectedTagIds]);
 
   /* FORMAT EXPIRY TEXT */
   const getExpiryText = (expiresAt: string): string => {
@@ -97,6 +105,13 @@ const MySpacePage = () => {
     setActiveFilter(tabId as typeof FILTER_TYPE[keyof typeof FILTER_TYPE]);
   };
 
+  /* HANDLE TAG FILTER */
+  const handleToggleTag = (tagId: number) => {
+    setSelectedTagIds((prev) =>
+      prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId],
+    );
+  };
+
   return (
     <main className="clear-page my-space-page">
       <header className="my-space-topbar">
@@ -134,6 +149,22 @@ const MySpacePage = () => {
 
           {/* FILTER SWITCH */}
           <Switch activeTab={activeFilter} tabs={filterTabs} onTabChange={handleTabChange} />
+
+          {/* TAG FILTER */}
+          {availableTags.length > 0 && (
+            <div className="chip-row">
+              {availableTags.map((tag) => (
+                <button
+                  key={tag.id}
+                  type="button"
+                  className={`chip chip-action${selectedTagIds.includes(tag.id) ? ' chip-active' : ''}`}
+                  onClick={() => handleToggleTag(tag.id)}
+                >
+                  {tag.name}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* FILE LIST */}
           <div className="file-list">

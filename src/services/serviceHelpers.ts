@@ -24,6 +24,9 @@ export const catchApiError = (error: unknown): ErrorMsg => {
     case 404:
       message = 'Non trouvé';
       break;
+    case 410:
+      message = 'Lien expiré';
+      break;
     case 500:
       message = 'Erreur serveur';
       break;

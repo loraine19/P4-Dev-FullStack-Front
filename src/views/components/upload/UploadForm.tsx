@@ -44,9 +44,19 @@ const UploadForm = () => {
   const normalizedTag = useMemo(() => tagInput.trim().toLowerCase(), [tagInput]);
   const tagSuggestions = useMemo(() => userTags.map((t) => t.name), [userTags]);
 
-  const handleAddTag = () => {
-    if (!normalizedTag || selectedTagNames.includes(normalizedTag)) return;
-    setSelectedTagNames((prev) => [...prev, normalizedTag]);
+  const handleAddTag = async () => {
+    if (!normalizedTag) return;
+    const existing = userTags.find((t) => t.name.toLowerCase() === normalizedTag);
+    if (existing) {
+      if (selectedTagNames.some((n) => n.toLowerCase() === normalizedTag)) return;
+      setSelectedTagNames((prev) => [...prev, existing.name]);
+      setTagInput('');
+      return;
+    }
+    const result = await tagService.create(tagInput.trim());
+    if ('level' in result) return;
+    setUserTags((prev) => [...prev, result]);
+    setSelectedTagNames((prev) => [...prev, result.name]);
     setTagInput('');
   };
 

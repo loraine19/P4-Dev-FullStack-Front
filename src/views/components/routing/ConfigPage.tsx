@@ -14,8 +14,8 @@ const ConfigPage = ({ ctaLabel, ctaPath }: IConfigPageProps) => {
   const { pathname } = useLocation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  const resolvedCtaLabel = ctaLabel ?? (pathname === '/' ? (isAuthenticated ? 'Mon espace' : 'Se connecter') : 'Retour accueil');
-  const resolvedCtaPath = ctaPath ?? (pathname === '/' ? (isAuthenticated ? '/my-space' : '/?auth=login') : '/');
+  const resolvedCtaLabel = ctaLabel ?? (pathname === '/' ? (isAuthenticated ? 'Mon espace' : 'Se connecter') : (isAuthenticated ? 'Mon espace' : 'Retour accueil'));
+  const resolvedCtaPath = ctaPath ?? (pathname === '/' ? (isAuthenticated ? '/my-space' : '/?auth=login') : (isAuthenticated ? '/my-space' : '/'));
 
   return (
     <>

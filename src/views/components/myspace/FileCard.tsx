@@ -28,6 +28,13 @@ const FileCard = ({ file, expiryText, onDelete, onDownload }: IFileCardProps) =>
         <div className="file-card-copy">
           <h3 className="file-card-title">{file.originalName}</h3>
           <p className={`file-card-expiry ${isExpired ? 'is-expired' : ''}`}>{expiryText}</p>
+          {file.tags?.length > 0 && (
+            <ul className="chip-row" aria-label="Tags">
+              {file.tags.map((tag) => (
+                <li key={tag.id} className="chip">{tag.name}</li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
