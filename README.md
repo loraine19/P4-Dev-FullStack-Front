@@ -6,12 +6,12 @@ DataShare est une SPA React permettant le partage sécurisé de fichiers via une
 
 L'application propose :
 
-- **Page d'accueil** (`/`) — formulaire de connexion / inscription avec switch Login↔Register
-- **Mon espace** (`/my-space`) — liste des fichiers uploadés, liens de partage, tags, suppression
-- **Upload** (`/upload`) — sélection du fichier, durée d'expiration, mot de passe optionnel, tags
-- **Téléchargement** (`/download/:shareToken`) — page publique accessible sans compte, saisie du mot de passe si protégé
+- **Page d'accueil** (`/`) - formulaire de connexion / inscription avec switch Login↔Register
+- **Mon espace** (`/my-space`) - liste des fichiers uploadés, liens de partage, tags, suppression
+- **Upload** (`/upload`) - sélection du fichier, durée d'expiration, mot de passe optionnel, tags
+- **Téléchargement** (`/download/:shareToken`) - page publique accessible sans compte, saisie du mot de passe si protégé
 
-L'authentification est gérée via **cookie httpOnly** (mode web — posé par le serveur, jamais accessible en JS) ou **Bearer Token JWT en localStorage** (mode mobile uniquement). Un intercepteur Axios redirige automatiquement vers `/` en cas de token expiré (réponse 401).
+L'authentification est gérée via **cookie httpOnly** (mode web - posé par le serveur, jamais accessible en JS) ou **Bearer Token JWT en localStorage** (mode mobile uniquement). Un intercepteur Axios redirige automatiquement vers `/` en cas de token expiré (réponse 401).
 
 ## Stack technique
 
@@ -36,7 +36,7 @@ src/
 │   ├── downloadApi.ts    ← getMeta / download
 │   └── tagApi.ts         ← getAll / create / remove
 ├── infrastructure/
-│   └── tokenStorage.ts   ← localStorage (mode mobile uniquement — web = cookie httpOnly)
+│   └── tokenStorage.ts   ← localStorage (mode mobile uniquement -  web = cookie httpOnly)
 ├── services/
 │   ├── authService.ts    ← login(), register(), logout()
 │   ├── fileService.ts    ← getMyFiles(), uploadFile(), deleteFile()
@@ -82,10 +82,10 @@ UI Event -> Page (orchestration) -> Service (appel API) -> Api layer (Axios + Be
 ```
 
 - **Pages** : orchestrent les composants, appellent les services, mettent à jour les stores
-- **Composants** : UI pure — reçoivent des props, aucun appel API, aucune mutation de store
-- **Stores** : état pur — setters uniquement, jamais d'appel réseau
+- **Composants** : UI pure - reçoivent des props, aucun appel API, aucune mutation de store
+- **Stores** : état pur - setters uniquement, jamais d'appel réseau
 - **Services** : appellent l'api layer et retournent les données typées
-- **Api layer** : Axios centralisé — un seul endroit pour configurer `Authorization: Bearer`
+- **Api layer** : Axios centralisé - un seul endroit pour configurer `Authorization: Bearer`
 
 ## Prérequis
 
