@@ -1,4 +1,4 @@
-/* PARCOURS 3 — Espace personnel : liste + suppression */
+/* PARCOURS 3 -  Espace personnel : liste + suppression */
 
 const TS = Date.now();
 const USER = {
@@ -10,7 +10,7 @@ const FILENAME = `myspace-file-${TS}.txt`;
 // same base name → backend renames it myspace-file-${TS}(1).txt
 const FILENAME_DUP = `myspace-file-${TS}(1).txt`;
 
-describe('Parcours 3 — Espace personnel', () => {
+describe('Parcours 3 -  Espace personnel', () => {
   let token: string;
 
   before(() => {

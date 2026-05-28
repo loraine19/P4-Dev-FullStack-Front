@@ -1,4 +1,4 @@
-/* PARCOURS 2 — Upload fichier → lien de partage */
+/* PARCOURS 2 -  Upload fichier → lien de partage */
 
 const TS = Date.now();
 const USER = {
@@ -7,14 +7,14 @@ const USER = {
   password: 'Password1!',
 };
 
-describe('Parcours 2 — Upload fichier', () => {
+describe('Parcours 2 -  Upload fichier', () => {
   before(() => {
     // create user via API (clean setup)
     cy.registerViaApi(USER.name, USER.email, USER.password);
   });
 
   beforeEach(() => {
-    // login via API — Cypress preserves Set-Cookie for cy.visit
+    // login via API -  Cypress preserves Set-Cookie for cy.visit
     cy.loginViaApi(USER.email, USER.password);
   });
 
@@ -53,5 +53,45 @@ describe('Parcours 2 — Upload fichier', () => {
 
     cy.url().should('include', '/upload');
     cy.get('[class*="callout"]').should('exist');
+  });
+
+  it('4.3 Upload avec mot de passe de téléchargement → icône cadenas sur la fiche', () => {
+    /* Arrange */
+    cy.visit('/upload');
+
+    /* Act */
+    cy.get('#upload-file').selectFile({
+      contents: Cypress.Buffer.from('protected file content'),
+      fileName: `protected-${TS}.txt`,
+      mimeType: 'text/plain',
+    });
+    cy.get('#upload-password').type('Secret1234!');
+    cy.contains('button', 'Générer un lien de partage').click();
+
+    /* Assert */
+    cy.url().should('include', '/my-space');
+    cy.get('[aria-label="Fichier protégé"]').should('exist');
+  });
+
+  it('4.4 Upload avec tag sélectionné → tag affiché sur la fiche dans MySpace', () => {
+    /* Arrange */
+    const tagName = `tag-up-${TS}`;
+    cy.visit('/upload');
+
+    /* Act -  create tag and attach file */
+    cy.get('#upload-tags').type(tagName);
+    cy.get('[aria-label="Ajouter le tag"]').click();
+    cy.get('[aria-label="Tags sélectionnés"]').contains(tagName).should('be.visible');
+
+    cy.get('#upload-file').selectFile({
+      contents: Cypress.Buffer.from('tagged file content'),
+      fileName: `tagged-${TS}.txt`,
+      mimeType: 'text/plain',
+    });
+    cy.contains('button', 'Générer un lien de partage').click();
+
+    /* Assert */
+    cy.url().should('include', '/my-space');
+    cy.get('[aria-label="Tags"]').contains(tagName).should('be.visible');
   });
 });

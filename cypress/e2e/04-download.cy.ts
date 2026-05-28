@@ -1,4 +1,4 @@
-/* PARCOURS 4 — Téléchargement via lien public (sans mot de passe) */
+/* PARCOURS 4 -  Téléchargement via lien public (sans mot de passe) */
 
 const TS = Date.now();
 const USER = {
@@ -8,7 +8,7 @@ const USER = {
 };
 const FILENAME = `download-public-${TS}.txt`;
 
-describe('Parcours 4 — Download via lien public', () => {
+describe('Parcours 4 -  Download via lien public', () => {
   let shareToken: string;
 
   before(() => {
@@ -22,7 +22,7 @@ describe('Parcours 4 — Download via lien public', () => {
 
   it('4.1 Page download accessible + métadonnées visibles', () => {
     cy.visit(`/download/${shareToken}`);
-    // metadata callout: "Fichier : filename — x Ko"
+    // metadata callout: "Fichier : filename -  x Ko"
     cy.contains(FILENAME).should('be.visible');
     // no password field (file is public)
     cy.get('#download-password').should('not.exist');
@@ -42,6 +42,22 @@ describe('Parcours 4 — Download via lien public', () => {
 
   it('4.3 Token invalide → message erreur (lien expiré/invalide)', () => {
     cy.visit('/download/token-invalide-000');
+    cy.get('[class*="callout"]').should('exist');
+    cy.contains('button', 'Télécharger').should('not.exist');
+  });
+
+  it('8.2 Lien expiré → message d\'erreur affiché', () => {
+    /* Arrange -  intercept GET to simulate 410 Gone */
+    cy.intercept('GET', '**/download/expired-link-test', {
+      statusCode: 410,
+      body: { status: 'error', message: 'Ce lien a expiré.' },
+    }).as('getExpiredMeta');
+
+    /* Act */
+    cy.visit('/download/expired-link-test');
+    cy.wait('@getExpiredMeta');
+
+    /* Assert */
     cy.get('[class*="callout"]').should('exist');
     cy.contains('button', 'Télécharger').should('not.exist');
   });

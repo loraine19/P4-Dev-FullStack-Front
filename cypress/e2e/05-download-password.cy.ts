@@ -1,4 +1,4 @@
-/* PARCOURS 5 — Téléchargement avec mot de passe */
+/* PARCOURS 5 -  Téléchargement avec mot de passe */
 
 const TS = Date.now();
 const USER = {
@@ -9,7 +9,7 @@ const USER = {
 const FILENAME = `download-pwd-${TS}.txt`;
 const FILE_PASSWORD = 'Secret1234!';
 
-describe('Parcours 5 — Download fichier protégé par mot de passe', () => {
+describe('Parcours 5 -  Download fichier protégé par mot de passe', () => {
   let shareToken: string;
 
   before(() => {

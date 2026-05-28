@@ -12,7 +12,7 @@ declare global {
 }
 
 /*
- * loginViaApi — uses isMobile:true to get a Bearer token in the JSON response,
+ * loginViaApi -  uses isMobile:true to get a Bearer token in the JSON response,
  * then stores it in Cypress.env('_userToken'). The cy.visit override below
  * automatically injects it into localStorage via onBeforeLoad so that the Zustand
  * authStore initialises with isAuthenticated:true (tokenStorage reads localStorage).
@@ -28,7 +28,7 @@ Cypress.Commands.add('loginViaApi', (email: string, password: string) => {
   });
 });
 
-/* register via API — failOnStatusCode:false ignores 409 if user already exists */
+/* register via API -  failOnStatusCode:false ignores 409 if user already exists */
 Cypress.Commands.add('registerViaApi', (name: string, email: string, password: string) => {
   cy.request({
     method: 'POST',
