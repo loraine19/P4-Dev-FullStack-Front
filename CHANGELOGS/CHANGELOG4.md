@@ -1,13 +1,24 @@
-# CHANGELOG - feat/api (UX tags, Cypress E2E, corrections)
+# CHANGELOG4 - feat/api (UX tags, Cypress E2E) - front
 
 **Sprint step** : STEP 4 - US02, US05, US08 (filtrage tags, affichage tags, tests E2E)
 **Branche** : `feat/api`
 
-**Objectif** : Améliorer l'expérience utilisateur autour des tags (affichage sur FileCard, filtrage par chip dans MySpace, création automatique à l'upload), corriger des bugs UX (CTA ConfigPage, expiration options, intercepteur 401), et couvrir les parcours E2E navigateur avec Cypress 15.
+**Objectif** : Améliorer l'expérience utilisateur autour des tags (affichage sur FileCard, filtrage par chip dans MySpace, création automatique à l'upload), corriger des bugs UX (CTA ConfigPage, intercepteur 401), et couvrir les parcours E2E navigateur avec Cypress 15.
 
 ---
 
-## Ce qui est en place
+[1. Ce qui est en place](#1-ce-qui-est-en-place)
+[2. Choix techniques](#2-choix-techniques)
+[a. Filtre cumulatif statut + tags dans MySpace](#a-filtre-cumulatif-statut--tags-dans-myspace)
+[b. Création de tag à la volée dans UploadForm](#b-création-de-tag-à-la-volée-dans-uploadform)
+[c. ConfigPage - CTA contextuel](#c-configpage---cta-contextuel)
+[d. Intercepteur 401 - exclusion des routes publiques](#d-intercepteur-401---exclusion-des-routes-publiques)
+[e. Cypress 15 - compatibilité TypeScript](#e-cypress-15---compatibilité-typescript)
+[3. Résultats des tests](#3-résultats-des-tests)
+
+---
+
+## 1. Ce qui est en place
 
 | Thème                            | US         | Ce qui est opérationnel                                                                                      |
 | :------------------------------- | :--------- | :----------------------------------------------------------------------------------------------------------- |
@@ -25,67 +36,41 @@
 
 ---
 
-## Détail des changements
+## 2. Choix techniques
 
-### `src/views/components/myspace/FileCard.tsx`
+### a. Filtre cumulatif statut + tags dans MySpace
 
-- Affichage des tags du fichier dans la card sous le texte d'expiration.
-- Rendu conditionnel : `file.tags?.length > 0` → liste `<ul class="chip-row">`.
-- `aria-label="Tags"` pour accessibilité.
+`selectedTagIds` : état local `number[]` - les chips sont des toggles indépendants.
+`filteredFiles` : applique les deux filtres en séquence - statut (ALL/ACTIVE/EXPIRED) puis intersection avec les tags sélectionnés.
+`availableTags` : memo calculant les tags uniques depuis les fichiers chargés (Map id → name) - pas d'appel API dédié.
 
-### `src/views/pages/MySpacePage.tsx`
+### b. Création de tag à la volée dans UploadForm
 
-- `selectedTagIds` : état local `number[]` pour les tags actifs.
-- `availableTags` : memo extrayant tous les tags uniques des fichiers chargés (Map id → name).
-- `filteredFiles` : filtre cumulatif - statut (ALL/ACTIVE/EXPIRED) **+** tags sélectionnés.
-- `handleToggleTag` : bascule l'état actif d'un tag (toggle dans `selectedTagIds`).
-- Rendu : chip-row entre le switch et la liste de fichiers - chip `chip-active` si sélectionné.
+`handleAddTag` passe en `async` - recherche d'abord dans `userTags` (local) avant d'appeler `tagService.create()`.
+Si le tag existe localement → sélection sans doublon, pas d'appel API. Si nouveau → création via API + ajout à la liste locale.
+Abandon silencieux si `tagService.create()` retourne une `ErrorMsg`.
 
-### `src/views/components/upload/UploadForm.tsx`
+### c. ConfigPage - CTA contextuel
 
-- `handleAddTag` passe en `async`.
-- Recherche d'abord dans `userTags` (local) avant d'appeler l'API.
-- Si le tag existe → l'ajoute à `selectedTagNames` sans doublon.
-- Si le tag est nouveau → `tagService.create()` → ajout à `userTags` + `selectedTagNames`.
-- Gestion d'erreur : si `result` contient `level` (ErrorMsg), abandon silencieux.
+Label et cible du CTA résolus selon deux conditions : `isAuthenticated` **et** `pathname !== '/'`.
+Utilisateur connecté hors page d'accueil → `Mon espace` / `/my-space` ; non connecté → `Retour accueil` / `/`.
 
-### `src/views/components/routing/ConfigPage.tsx`
+### d. Intercepteur 401 - exclusion des routes publiques
 
-- CTA label/path résolu selon `isAuthenticated` **et** `pathname`.
-- Sur une page autre que `/` : utilisateur connecté → `Mon espace` / `/my-space` ; non connecté → `Retour accueil` / `/`.
+`/download/` exclu de l'intercepteur Axios - évite une redirect vers login sur les routes de téléchargement public.
+`catchApiError` : ajout du `case 410` → message `'Lien expiré'` - distingué du 404 pour un message front explicite.
 
-### `src/index.css`
+### e. Cypress 15 - compatibilité TypeScript
 
-- Classe `.chip-active` : fond `#2c2831`, texte blanc, bordure assortie - état actif du chip filtre.
-
-### `src/services/serviceHelpers.ts`
-
-- `catchApiError` : ajout du `case 410` → message `'Lien expiré'` pour les fichiers expirés (le back renvoie 410 sur `GET /download/:token`).
-
-### `cypress/tsconfig.json`
-
-- `target` / `lib` : `ES2022` → `ES2020`.
-- `module` : `ES2022` → `commonjs` - requis par le runner Cypress.
-- Suppression de `ignoreDeprecations: '6.0'` et `moduleDetection: 'force'` - options incompatibles avec la config actuelle.
+`target`/`lib` : ES2022 → ES2020, `module` : ES2022 → commonjs - requis par le runner Cypress 15.
+Options `ignoreDeprecations` et `moduleDetection` supprimées - incompatibles avec la config actuelle.
 
 ---
 
-## Tests E2E Cypress
+## 3. Résultats des tests
 
-- Cypress 15 installé (`chore(deps): npm update patch/minor`).
-- `cypress/e2e/` : 5 fichiers de spec couvrant les parcours principaux.
-- `14/14` cas de test verts.
-- Section dédiée dans `TESTING.md` (parcours E2E navigateur).
+| Suite          | Outil      | Tests | Statut |
+| :------------- | :--------- | :---- | :----- |
+| E2E navigateur | Cypress 15 | 14/14 | ✅     |
 
----
-
-## Commits couverts
-
-| Hash        | Message                                                                                  |
-| :---------- | :--------------------------------------------------------------------------------------- |
-| `050a718`   | `test(e2e): Cypress 15 -  5 parcours E2E, 14/14 cas de test`                             |
-| `203de17`   | `fix(apiClient): exclure /download/ de l'intercepteur 401`                               |
-| `5d89646`   | `chore(deps): npm update patch/minor + install Cypress 15`                               |
-| `d1fa422`   | `docs(download): add inline comments on blob/responseType flow + fix expiration options` |
-| `c62a37d`   | `fix(ui): add type=submit on forms, fix download layout, align expiration options`       |
-| _(à venir)_ | `feat(myspace): tag filter + display tags on FileCard + tag creation on upload`          |
+5 specs dans `cypress/e2e/` - parcours authentification, upload, download, tags, MySpace.

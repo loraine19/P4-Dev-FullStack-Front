@@ -1,4 +1,4 @@
-# CHANGELOG - main
+# CHANGELOG1 - main - front
 
 **Sprint step** : STEP 2 + STEP 3 - Initialisation + US03/US04 (auth hybride front)
 **Branche** : `main`
@@ -7,7 +7,18 @@
 
 ---
 
-## Ce qui est en place
+[1. Ce qui est en place](#1-ce-qui-est-en-place)
+[2. Choix techniques](#2-choix-techniques)
+[a. Pattern classe+interface+singleton](#a-pattern-classeinterfacesingleton)
+[b. Auth hybride](#b-auth-hybride)
+[c. FieldValidator - pas de hook de validation](#c-fieldvalidator---pas-de-hook-de-validation)
+[d. serviceHelpers - gestion erreurs uniforme](#d-servicehelpers---gestion-erreurs-uniforme)
+[e. Stores Zustand - double interface](#e-stores-zustand---double-interface)
+[3. Variables d'environnement requises](#3-variables-denvironnement-requises)
+
+---
+
+## 1. Ce qui est en place
 
 | Thème           | Ce qui est opérationnel                                               |
 | :-------------- | :-------------------------------------------------------------------- |
@@ -22,9 +33,9 @@
 
 ---
 
-## Choix techniques
+## 2. Choix techniques
 
-### Pattern classe+interface+singleton
+### a. Pattern classe+interface+singleton
 
 Chaque couche expose une interface puis une implémentation, exportée comme singleton :
 
@@ -36,24 +47,24 @@ export const fileApi = new FileApi();
 
 Avantage : mockable en test, typage fort, pas de state dans la couche API.
 
-### Auth hybride
+### b. Auth hybride
 
 `withCredentials: true` sur l'instance Axios - le cookie httpOnly est envoyé automatiquement (web).
 `authService.login()` stocke `access_token` en localStorage **uniquement** si `isMobile: true`.
 L'intercepteur 401 efface le token et redirige vers `/` dans les deux cas.
 
-### FieldValidator - pas de hook de validation
+### c. FieldValidator - pas de hook de validation
 
 `FieldValidator<T>` est une classe pure instanciée au niveau module (pas dans le composant).
 Pas de hook (`useFieldValidation`) - les hooks ajoutent un cycle de vie React inutile pour de la validation stateless.
 
-### serviceHelpers - gestion erreurs uniforme
+### d. serviceHelpers - gestion erreurs uniforme
 
 `catchApiError(error)` - wraps les erreurs réseau/axios en `ErrorMsg`.
 `getApiError(data)` - lit `ApiResponseEnvelope.status === "error"` et retourne `ErrorMsg | null`.
 Les services ne lèvent jamais d'exception - ils retournent `ErrorMsg | T`.
 
-### Stores Zustand - double interface
+### e. Stores Zustand - double interface
 
 ```ts
 interface IDomainState { ... }
@@ -65,52 +76,7 @@ const useDomainStore = create<IDomainState & IDomainActions>(...)
 
 ---
 
-## Structure des fichiers notables
-
-```
-src/
-  App.tsx                        -  routing, ProtectedRoute, ConfigPage layout
-  api/
-    apiClient.ts                 -  Axios, withCredentials, intercepteur 401
-    authApi.ts                   -  IAuthApi, authApi singleton
-    fileApi.ts                   -  IFileApi, fileApi singleton
-    tagApi.ts                    -  ITagApi, tagApi singleton (singulier)
-    downloadApi.ts               -  IDownloadApi, downloadApi singleton
-  services/
-    authService.ts               -  login(), register(), logout()
-    fileService.ts               -  getMyFiles(), uploadFile(), deleteFile()
-    serviceHelpers.ts            -  catchApiError, getApiError
-  stores/
-    authStore.ts                 -  IAuthState + IAuthActions, useAuthStore
-    fileStore.ts                 -  IFileState + IFileActions, useFileStore
-    tagStore.ts                  -  ITagState + ITagActions, useTagStore (singulier)
-  utils/
-    tokenStorage.ts              -  TokenStorage, tokenStorage singleton
-    fieldValidation.ts           -  FieldValidator<T> classe stateless
-    authValidation.ts            -  validateLoginField, validateRegisterField
-    mockFiles.ts                 -  FILE_STATUS as const, IFile, TFileStatus
-  views/
-    components/
-      routing/
-        ProtectedRoute.tsx       -  redirige vers / si non authentifié
-        ConfigPage.tsx           -  layout commun (Navbar + Sidebar + outlet)
-        UploadRoute.tsx
-      shared/
-        Navbar.tsx · Sidebar.tsx · Switch.tsx · ContextMenu.tsx
-        UploadButton.tsx · UploadCall.tsx
-      myspace/
-        FileCard.tsx
-      upload/
-        UploadForm.tsx
-      welcome/
-        LoginForm.tsx · RegisterForm.tsx
-      download/
-        DownloadForm.tsx
-```
-
----
-
-## Variables d'environnement requises
+## 3. Variables d'environnement requises
 
 ```env
 VITE_API_URL=http://localhost:3000/api/v1
