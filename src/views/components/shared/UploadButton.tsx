@@ -1,9 +1,12 @@
-import { CloudUpload } from '@project-lary/react-material-symbols';
+import { CloudUpload } from './Icons';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 import useFileStore from '../../../stores/fileStore';
 import { MAX_FILE_SIZE, FORBIDDEN_EXTENSIONS } from '../../../constants/upload';
+import { ERROR_MESSAGES } from '../../../constants/error-messages';
 
+// augments Window to declare non-standard File System Access API (not yet in lib.dom.d.ts)
 declare global {
   interface Window {
     showOpenFilePicker?: (options?: {
@@ -15,20 +18,16 @@ declare global {
 /* UPLOAD BUTTON */
 const UploadButton = () => {
   const inputRef = useRef<HTMLInputElement>(null);
-  const { setUploadingFile, uploadingFile } = useFileStore();
   const navigate = useNavigate();
+  const { uploadingFile, setUploadingFile } = useFileStore(
+    useShallow((s) => ({ uploadingFile: s.uploadingFile, setUploadingFile: s.setUploadingFile })),
+  );
 
   /* VALIDATE FILE */
-  const validateFile = (file: File) => {
-    if (file.size > MAX_FILE_SIZE) {
-      return 'Le fichier dépasse la taille maximale autorisée de 1 Go.';
-    }
-
-    const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
-    if (FORBIDDEN_EXTENSIONS.has(extension)) {
-      return `Le type de fichier .${extension} est interdit.`;
-    }
-
+  const validateFile = ({ size, name }: File): string => {
+    if (size > MAX_FILE_SIZE) return ERROR_MESSAGES.UPLOAD.FILE_TOO_LARGE;
+    const ext = name.split('.').pop()?.toLowerCase() ?? '';
+    if (FORBIDDEN_EXTENSIONS.has(ext)) return ERROR_MESSAGES.UPLOAD.INVALID_EXTENSION(ext);
     return '';
   };
 

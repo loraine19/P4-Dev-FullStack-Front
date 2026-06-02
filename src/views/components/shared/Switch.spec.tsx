@@ -10,7 +10,7 @@ const TABS = [
 ];
 
 describe('Switch', () => {
-  it('21.1 affiche tous les onglets', () => {
+  it('21.1 renders all tabs', () => {
     /* Arrange / Act */
     render(<Switch activeTab="all" tabs={TABS} onTabChange={vi.fn()} />);
 
@@ -20,7 +20,7 @@ describe('Switch', () => {
     expect(screen.getByText('Expiré')).toBeInTheDocument();
   });
 
-  it('21.2 l\'onglet actif a la classe is-active', () => {
+  it('21.2 active tab has is-active class', () => {
     /* Arrange / Act */
     render(<Switch activeTab="active" tabs={TABS} onTabChange={vi.fn()} />);
 
@@ -29,7 +29,7 @@ describe('Switch', () => {
     expect(screen.getByText('Tous')).not.toHaveClass('is-active');
   });
 
-  it('21.3 appelle onTabChange au clic', async () => {
+  it('21.3 calls onTabChange on click', async () => {
     /* Arrange */
     const onTabChange = vi.fn();
     render(<Switch activeTab="all" tabs={TABS} onTabChange={onTabChange} />);

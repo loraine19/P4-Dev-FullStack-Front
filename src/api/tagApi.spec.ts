@@ -19,7 +19,7 @@ beforeEach(() => vi.clearAllMocks());
 
 /* ---------------------------------------------------------------- getAll() */
 describe('tagApi.getAll()', () => {
-  it('16.1 appelle GET /tags', async () => {
+  it('16.1 calls GET /tags', async () => {
     /* Arrange */
     mockGet.mockResolvedValueOnce({ data: { status: 'success', data: [] } });
 
@@ -33,7 +33,7 @@ describe('tagApi.getAll()', () => {
 
 /* --------------------------------------------------------------- create() */
 describe('tagApi.create()', () => {
-  it('16.2 appelle POST /tags avec { name }', async () => {
+  it('16.2 calls POST /tags with { name }', async () => {
     /* Arrange */
     mockPost.mockResolvedValueOnce({ data: { status: 'success', data: {} } });
 
@@ -47,7 +47,7 @@ describe('tagApi.create()', () => {
 
 /* --------------------------------------------------------------- remove() */
 describe('tagApi.remove()', () => {
-  it('16.3 appelle DELETE /tags/:id', async () => {
+  it('16.3 calls DELETE /tags/:id', async () => {
     /* Arrange */
     mockDelete.mockResolvedValueOnce({ data: { status: 'success', data: null } });
 

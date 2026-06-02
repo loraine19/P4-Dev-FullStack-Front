@@ -293,14 +293,11 @@ h1 {
     list-style: none;
     cursor: pointer;
     color: #4f4a56;
-    border: 1px solid #dfdce1;
-    border-radius: 0.35rem;
-    min-width: 2rem;
-    min-height: 2rem;
+    min-width: 1rem;
+    min-height: 1rem;
     display: grid;
     place-items: center;
-    background: #fff;
-    font-weight: 700;
+    font-weight: 600;
     user-select: none;
     transition: background-color 0.2s ease;
 }
@@ -349,6 +346,8 @@ h1 {
 
 /* FILE LIST */
 .file-list {
+    max-height: calc(100vh - 17rem);
+    overflow-y: auto;
     display: grid;
     gap: 0.8rem;
     margin: 0;
@@ -764,15 +763,18 @@ h1 {
 }
 
 .chip {
-    display: inline-flex;
+    min-width: 5rem;
+    text-align: center;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.2rem 0.55rem;
+    padding: 0.4rem 0.8rem;
     border: 1px solid #dfdce1;
     border-radius: 999px;
     font-size: 0.75rem;
     color: #564f5f;
     background: #fff;
+    gap: 0.25rem !important;
 }
 
 .chip-row {
@@ -781,15 +783,40 @@ h1 {
     gap: 0.45rem;
 }
 
+.chip-name {
+    margin: 0;
+    font-size: 0.75rem;
+    padding: 0 0.5rem 0 1rem;
+    flex: 1;
+    color: #564f5f;
+}
 .chip-action {
     border: 1px solid #d9c4b0;
     cursor: pointer;
+    background-color: var(--ds-topbar-bg);
+}
+
+.chip-action:hover {
+    background-color: var(--ds-space-bg);
+    color: var(--ds-ink-soft);
 }
 
 .chip-active {
     background: #2c2831;
     color: #fff;
     border-color: #2c2831;
+    gap: 0.25rem;
+}
+.chip-active:hover {
+    background-color: var(--ds-bg-error) !important;
+    color: var(--ds-error) !important;
+}
+
+.chip-action-close {
+    font-size: 0.85rem;
+    color: #8a837e;
+    cursor: pointer;
+    margin-left: 0.25rem;
 }
 
 .tag-row {

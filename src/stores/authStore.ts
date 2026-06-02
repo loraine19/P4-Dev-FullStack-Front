@@ -2,40 +2,53 @@ import { create } from 'zustand';
 import { tokenStorage } from '../infrastructure/tokenStorage';
 import { authService } from '../services/authService';
 import type { UserPublic, LoginPayload, RegisterPayload } from '../types/user.types';
-import type { ErrorMsg } from '../types/error.types';
+import { isErrorMsg, type ErrorMsg } from '../types/error.types';
 
 /* IAUTH STATE */
 interface IAuthState {
   user: UserPublic | null;
   isAuthenticated: boolean;
+  isInitialized: boolean;
   isLoading: boolean;
   error: ErrorMsg | null;
 }
 
 /* IAUTH ACTIONS */
 interface IAuthActions {
+  verifySession(): Promise<void>;
   setUser(user: UserPublic): void;
   clearError(): void;
   clearAuth(): void;
   login(credentials: LoginPayload): Promise<boolean>;
   register(data: RegisterPayload): Promise<boolean>;
-  logout(): Promise<void>;
+  logout(): Promise<boolean>;
 }
 
 /* AUTH STORE */
 const useAuthStore = create<IAuthState & IAuthActions>((set) => ({
   user: null,
   isAuthenticated: !!tokenStorage.get(),
+  isInitialized: false,
   isLoading: false,
   error: null,
+
+  /* VERIFY SESSION */
+  // called once on app mount - validates cookie (web) or Bearer token (mobile)
+  verifySession: async () => {
+    const result = await authService.me();
+    console.log('verifySession result from STORE', result);
+    if (isErrorMsg(result)) {
+      set({ isAuthenticated: false, user: null, isInitialized: true });
+    } else {
+      set({ isAuthenticated: true, user: result, isInitialized: true });
+    }
+  },
 
   /* SET USER */
   setUser: (user) => set({ user, isAuthenticated: true }),
 
   /* CLEAR ERROR */
-  clearError: () => {
-    set({ error: null });
-  },
+  clearError: () => set({ error: null }),
 
   /* CLEAR AUTH */
   clearAuth: () => {
@@ -46,36 +59,41 @@ const useAuthStore = create<IAuthState & IAuthActions>((set) => ({
   login: async (credentials: LoginPayload): Promise<boolean> => {
     set({ isLoading: true, error: null });
     const response: UserPublic | ErrorMsg = await authService.login(credentials);
-    if ('level' in response) {
-      set({ error: response as ErrorMsg, isAuthenticated: false, isLoading: false });
+    if (isErrorMsg(response)) {
+      set({ error: response, isAuthenticated: false, isLoading: false });
       return false;
-    } else if (response) {
-      set({ user: response, isAuthenticated: true, error: null, isLoading: false });
-      return true;
     }
-    set({ isLoading: false });
-    return false;
+    set({ user: response, isAuthenticated: true, error: null, isLoading: false });
+    return true;
   },
 
   /* REGISTER ORCHESTRATION */
   register: async (data: RegisterPayload): Promise<boolean> => {
     set({ isLoading: true, error: null });
     const response = await authService.register(data);
-    if ('level' in response) {
-      set({ error: response as ErrorMsg, isAuthenticated: false, isLoading: false });
+    if (isErrorMsg(response)) {
+      set({ error: response, isAuthenticated: false, isLoading: false });
       return false;
-    } else if ('success' in response && response.success) {
+    }
+    else {
       set({ error: null, isLoading: false });
       return true;
     }
-    set({ isLoading: false });
-    return false;
   },
 
   /* LOGOUT */
-  logout: async (): Promise<void> => {
-    await authService.logout();
-    set({ user: null, isAuthenticated: false, error: null });
+  logout: async (): Promise<boolean> => {
+    alert('logout from STORE');
+   const result = await authService.logout();
+   console.log('result', result);
+   if (isErrorMsg(result)) {
+    set({ error: result, isAuthenticated: false, isLoading: false });
+    return false;
+   }
+   else {
+     set({ user: null, isAuthenticated: false, error: null, isLoading: false });
+     return true;
+   }
   },
 }));
 

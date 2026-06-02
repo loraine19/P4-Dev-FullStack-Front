@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { MoreVert } from '@project-lary/react-material-symbols';
+import { MoreVert } from './Icons';
 
 /* CONTEXT MENU ITEM */
 interface IContextMenuItem {
@@ -44,16 +44,19 @@ const ContextMenu = ({ items }: IContextMenuProps) => {
         className="context-menu-trigger"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Options"
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
       >
         <MoreVert />
       </button>
 
       {isOpen && (
-        <div className="context-menu-panel">
+        <div className="context-menu-panel" role="menu">
           {items.map((item) => (
             <button
               key={item.label}
               type="button"
+              role="menuitem"
               className="context-menu-item"
               onClick={() => handleItemClick(item.action)}
             >

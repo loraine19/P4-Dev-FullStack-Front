@@ -1,4 +1,4 @@
-/* PARCOURS 7 -  Gestion des tags · US08 */
+/* FLOW 7 - Tags · US08 */
 
 const TS = Date.now();
 const USER = {
@@ -8,7 +8,7 @@ const USER = {
 };
 const TAG_NAME = `tag-cy-${TS}`;
 
-describe('Parcours 7 -  Tags', () => {
+describe('Flow 7 - Tags', () => {
   before(() => {
     cy.registerViaApi(USER.name, USER.email, USER.password);
   });
@@ -17,25 +17,25 @@ describe('Parcours 7 -  Tags', () => {
     cy.loginViaApi(USER.email, USER.password);
   });
 
-  it('9.1 Créer un tag via le formulaire d\'upload → visible dans la chip list', () => {
+  it('9.1 Create tag via upload form → visible in chip list', () => {
     /* Arrange */
     cy.visit('/upload');
 
     /* Act */
-    cy.get('#upload-tags').type(TAG_NAME);
+    cy.get('[aria-label="Saisir un tag"]').type(TAG_NAME);
     cy.get('[aria-label="Ajouter le tag"]').click();
 
     /* Assert */
     cy.get('[aria-label="Tags sélectionnés"]').contains(TAG_NAME).should('be.visible');
   });
 
-  it('9.2 Associer un tag à un upload → tag affiché sur la fiche dans MySpace', () => {
+  it('9.2 Attach tag to upload → tag on MySpace card', () => {
     /* Arrange */
     cy.visit('/upload');
 
     /* Act */
-    cy.get('#upload-tags').type(TAG_NAME);
-    cy.get('[aria-label="Ajouter le tag"]').click();
+    cy.get('[aria-label="Saisir un tag"]').type(TAG_NAME);
+    cy.get(`[aria-label="Retirer le tag ${TAG_NAME}"]`).should('be.visible');
     cy.get('#upload-file').selectFile({
       contents: Cypress.Buffer.from('tagged file content'),
       fileName: `tagged-${TS}.txt`,
@@ -48,11 +48,11 @@ describe('Parcours 7 -  Tags', () => {
     cy.get('[aria-label="Tags"]').contains(TAG_NAME).should('be.visible');
   });
 
-  it('9.3 Retirer un tag sélectionné → tag supprimé de la chip list', () => {
+  it('9.3 Remove selected tag → tag gone from chip list', () => {
     /* Arrange */
     cy.visit('/upload');
     cy.get('#upload-tags').type(TAG_NAME);
-    cy.get('[aria-label="Ajouter le tag"]').click();
+    cy.get(`[aria-label="Retirer le tag ${TAG_NAME}"]`).should('be.visible');
     cy.get('[aria-label="Tags sélectionnés"]').contains(TAG_NAME).should('be.visible');
 
     /* Act */
@@ -62,7 +62,7 @@ describe('Parcours 7 -  Tags', () => {
     cy.get('[aria-label="Tags sélectionnés"]').should('not.exist');
   });
 
-  it('9.4 Tag en double (nom déjà existant côté API) → callout erreur affiché', () => {
+  it('9.4 Duplicate tag name (API) → error callout shown', () => {
     /* Arrange -  force a 409 from the API for a new tag name (not in userTags list) */
     cy.visit('/upload');
     cy.intercept('POST', '**/tags', {

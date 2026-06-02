@@ -1,5 +1,5 @@
 import { downloadApi } from '../api/downloadApi';
-import type { DownloadMeta } from '../types/file.types';
+import type { DownloadMeta } from '../types/download.types';
 import type { ErrorMsg } from '../types/error.types';
 import { catchApiError } from './serviceHelpers';
 

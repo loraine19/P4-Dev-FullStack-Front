@@ -1,21 +1,22 @@
-import { Description, Lock } from '@project-lary/react-material-symbols';
+import { Description, Lock } from '../shared/Icons';
 import ContextMenu from '../shared/ContextMenu';
-import type { FileItem } from '../../../types/file.types';
+import type { FileItemDto } from '../../../types/file.types';
 
 /* FILE CARD PROPS */
-interface IFileCardProps {
-  file: FileItem;
+interface FileCardProps {
+  file: FileItemDto;
+  isExpired: boolean;
   expiryText: string;
   onDelete: (fileId: number) => void;
-  onDownload: (file: FileItem) => void;
+  onDownload: (file: FileItemDto) => void;
+  onCopyLink: (shareToken: string) => void;
 }
 
 /* FILE CARD */
-const FileCard = ({ file, expiryText, onDelete, onDownload }: IFileCardProps) => {
-  const isExpired = new Date(file.expiresAt) <= new Date();
-
+const FileCard = ({ file, isExpired, expiryText, onDelete, onDownload, onCopyLink }: FileCardProps) => {
   /* MENU ITEMS */
   const menuItems = [
+    { label: 'Copier le lien', action: () => onCopyLink(file.shareToken) },
     { label: 'Télécharger', action: () => onDownload(file) },
     { label: 'Supprimer', action: () => onDelete(file.id) },
   ];

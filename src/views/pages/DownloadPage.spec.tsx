@@ -14,7 +14,7 @@ const mockGetMeta = downloadService.getMeta as ReturnType<typeof vi.fn>;
 beforeEach(() => vi.clearAllMocks());
 
 describe('DownloadPage', () => {
-  it('31.1 affiche le titre Lien de téléchargement', async () => {
+  it('31.1 renders Download link title', async () => {
     /* Arrange */
     mockGetMeta.mockResolvedValueOnce({ level: 'error', message: 'Expiré' });
 

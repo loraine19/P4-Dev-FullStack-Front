@@ -2,6 +2,8 @@ import type { Rule } from '../utils/fieldValidation';
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export const PASSWORD_MIN_LENGTH = 8;
+
 /* RULES */
 export const RULES = {
   required: (message: string): Rule => ({

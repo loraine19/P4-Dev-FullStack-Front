@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import Button from '../shared/Button';
 import Callout from '../shared/Callout';
 import InputField from '../shared/forms/InputField';
-import { downloadService } from '../../../services/downloadService';
-import type { DownloadMeta } from '../../../types/file.types';
-import type { ErrorMsg } from '../../../types/error.types';
+import useDownloadStore from '../../../stores/downloadStore';
 
 /* DOWNLOAD FORM PROPS */
 interface IDownloadFormProps {
@@ -13,32 +12,27 @@ interface IDownloadFormProps {
 
 /* DOWNLOAD FORM */
 const DownloadForm = ({ shareToken }: IDownloadFormProps) => {
-  const [meta, setMeta] = useState<DownloadMeta | null>(null);
-  const [metaError, setMetaError] = useState<ErrorMsg | null>(null);
+  const { meta, metaError, downloadError, isLoading, getMeta, download } = useDownloadStore(
+    useShallow((s) => ({
+      meta: s.meta,
+      metaError: s.metaError,
+      downloadError: s.downloadError,
+      isLoading: s.isLoading,
+      getMeta: s.getMeta,
+      download: s.download,
+    })),
+  );
   const [password, setPassword] = useState('');
-  const [downloadError, setDownloadError] = useState<ErrorMsg | null>(null);
-  const [loading, setLoading] = useState(false);
 
   /* LOAD META */
   useEffect(() => {
-    if (!shareToken) return;
-    downloadService.getMeta(shareToken).then((result) => {
-      if ('level' in result) {
-        setMetaError(result);
-      } else {
-        setMeta(result);
-      }
-    });
-  }, [shareToken]);
+    if (shareToken) void getMeta(shareToken);
+  }, [shareToken, getMeta]);
 
   /* SUBMIT */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setDownloadError(null);
-    setLoading(true);
-    const result = await downloadService.download(shareToken, password || undefined);
-    setLoading(false);
-    if (result && 'level' in result) setDownloadError(result);
+    await download(shareToken, password || undefined);
   };
 
   return (
@@ -66,8 +60,8 @@ const DownloadForm = ({ shareToken }: IDownloadFormProps) => {
 
           {downloadError && <Callout error={downloadError} />}
 
-          <Button type="submit" variant="secondary" disabled={loading}>
-            {loading ? 'Téléchargement…' : 'Télécharger'}
+          <Button type="submit" variant="secondary" disabled={isLoading}>
+            {isLoading ? 'Téléchargement…' : 'Télécharger'}
           </Button>
         </form>
       )}

@@ -2,10 +2,6 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-vi.mock('@project-lary/react-material-symbols', () => ({
-  MoreVert: () => null,
-}));
-
 import ContextMenu from './ContextMenu';
 
 const ITEMS = [
@@ -14,7 +10,7 @@ const ITEMS = [
 ];
 
 describe('ContextMenu', () => {
-  it('24.1 affiche le bouton trigger Options', () => {
+  it('24.1 renders Options trigger button', () => {
     /* Arrange / Act */
     render(<ContextMenu items={ITEMS} />);
 
@@ -22,15 +18,16 @@ describe('ContextMenu', () => {
     expect(screen.getByRole('button', { name: 'Options' })).toBeInTheDocument();
   });
 
-  it('24.2 le menu est fermé par défaut', () => {
+  it('24.2 menu closed by default · aria-expanded false', () => {
     /* Arrange / Act */
     render(<ContextMenu items={ITEMS} />);
 
     /* Assert */
     expect(screen.queryByText('Télécharger')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Options' })).toHaveAttribute('aria-expanded', 'false');
   });
 
-  it('24.3 ouvre le menu au clic sur trigger', async () => {
+  it('24.3 opens menu on trigger click · aria-expanded true', async () => {
     /* Arrange */
     render(<ContextMenu items={ITEMS} />);
 
@@ -38,11 +35,12 @@ describe('ContextMenu', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Options' }));
 
     /* Assert */
-    expect(screen.getByText('Télécharger')).toBeInTheDocument();
-    expect(screen.getByText('Supprimer')).toBeInTheDocument();
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    expect(screen.getAllByRole('menuitem')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Options' })).toHaveAttribute('aria-expanded', 'true');
   });
 
-  it('24.4 appelle l\'action et ferme le menu au clic sur un item', async () => {
+  it('24.4 runs action and closes menu on item click', async () => {
     /* Arrange */
     const action = vi.fn();
     render(<ContextMenu items={[{ label: 'Télécharger', action }]} />);

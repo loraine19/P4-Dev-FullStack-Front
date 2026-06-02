@@ -4,12 +4,14 @@ vi.mock('../api/fileApi', () => ({
   fileApi: {
     getAll: vi.fn(),
     upload: vi.fn(),
+    uploadAnonymous: vi.fn(),
     remove: vi.fn(),
   },
 }));
 
 import { fileApi } from '../api/fileApi';
 import { fileService } from './fileService';
+import type { FileItemDto } from '../types/file.types';
 
 const mockGetAll = fileApi.getAll as ReturnType<typeof vi.fn>;
 const mockUpload = fileApi.upload as ReturnType<typeof vi.fn>;
@@ -19,21 +21,29 @@ const makeApiOk = (data: unknown) => ({
   data: { status: 'success', message: 'ok', data },
 });
 
-const makeFileItem = (overrides = {}) => ({
+const makeFileItem  = (overrides : Partial<FileItemDto> = {}) : FileItemDto => ({
   id: 1,
   originalName: 'photo.jpg',
   shareToken: 'tok123',
   passwordProtected: false,
-  expiresAt: null,
+  expiresAt: new Date().toISOString(),
   tags: [],
+  size: 1024,
+  mimeType: 'image/jpeg',
+  createdAt: new Date().toISOString(),
   ...overrides,
+});
+
+const makeUploadParams = () => ({
+  file: new File(['x'], 'photo.jpg', { type: 'image/jpeg' }),
+  expirationDays: 7,
 });
 
 beforeEach(() => vi.clearAllMocks());
 
 /* ---------------------------------------------------------------- getMyFiles() */
 describe('fileService.getMyFiles()', () => {
-  it('F.1 réponse ok → retourne tableau de fichiers', async () => {
+  it('F.1 ok response → returns file array', async () => {
     /* Arrange */
     mockGetAll.mockResolvedValueOnce(makeApiOk([makeFileItem()]));
 
@@ -45,7 +55,7 @@ describe('fileService.getMyFiles()', () => {
     expect((result as ReturnType<typeof makeFileItem>[])[0].id).toBe(1);
   });
 
-  it('F.2 data null → retourne tableau vide', async () => {
+  it('F.2 null data → returns empty array', async () => {
     /* Arrange */
     mockGetAll.mockResolvedValueOnce(makeApiOk(null));
 
@@ -56,7 +66,7 @@ describe('fileService.getMyFiles()', () => {
     expect(result).toEqual([]);
   });
 
-  it('F.3 erreur réseau → ErrorMsg', async () => {
+  it('F.3 network error → ErrorMsg', async () => {
     /* Arrange */
     mockGetAll.mockRejectedValueOnce({ response: { status: 401 } });
 
@@ -68,27 +78,27 @@ describe('fileService.getMyFiles()', () => {
   });
 });
 
-/* --------------------------------------------------------------- uploadFile() */
-describe('fileService.uploadFile()', () => {
-  it('F.4 upload ok → retourne FileItem', async () => {
+/* --------------------------------------------------------------- upload() */
+describe('fileService.upload()', () => {
+  it('F.4 authenticated upload ok → returns FileItem', async () => {
     /* Arrange */
     const item = makeFileItem();
     mockUpload.mockResolvedValueOnce(makeApiOk(item));
-    const fd = new FormData();
 
     /* Act */
-    const result = await fileService.uploadFile(fd);
+    const result = await fileService.upload(makeUploadParams(), true);
 
     /* Assert */
     expect(result).toEqual(item);
+    expect(mockUpload).toHaveBeenCalledOnce();
   });
 
-  it('F.5 erreur 400 → ErrorMsg', async () => {
+  it('F.5 400 error → ErrorMsg', async () => {
     /* Arrange */
     mockUpload.mockRejectedValueOnce({ response: { status: 400 } });
 
     /* Act */
-    const result = await fileService.uploadFile(new FormData());
+    const result = await fileService.upload(makeUploadParams(), true);
 
     /* Assert */
     expect(result).toMatchObject({ level: 'error' });
@@ -97,7 +107,7 @@ describe('fileService.uploadFile()', () => {
 
 /* -------------------------------------------------------------- deleteFile() */
 describe('fileService.deleteFile()', () => {
-  it('F.6 delete ok → résout sans valeur', async () => {
+  it('F.6 delete ok → resolves void', async () => {
     /* Arrange */
     mockRemove.mockResolvedValueOnce({});
 

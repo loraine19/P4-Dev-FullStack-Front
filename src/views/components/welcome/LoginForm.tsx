@@ -7,20 +7,20 @@ import Form from '../shared/forms/Form';
 import SwitchText from '../shared/SwitchText';
 
 /* LOGIN FORM PROPS */
-interface ILoginFormProps {
+interface LoginFormProps {
   onSwitch: () => void;
 }
 
 /* LOGIN FORM */
-const LoginForm = ({ onSwitch }: ILoginFormProps) => {
+const LoginForm = ({ onSwitch }: LoginFormProps) => {
   const navigate = useNavigate();
   const { error, isLoading, login } = useAuthStore(
     useShallow((s) => ({ error: s.error, isLoading: s.isLoading, login: s.login })),
   );
 
   /* HANDLE SUBMIT */
-  const handleSubmit = async (values: FieldValues<TLoginField>) => {
-    const success = await login({ email: values.email, password: values.password });
+  const handleSubmit = async ({ email, password }: FieldValues<TLoginField>) => {
+    const success = await login({ email, password });
     if (success) navigate('/my-space');
   };
 

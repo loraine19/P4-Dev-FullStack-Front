@@ -18,7 +18,7 @@ beforeEach(() => vi.clearAllMocks());
 
 /* --------------------------------------------------------------- getMeta() */
 describe('downloadApi.getMeta()', () => {
-  it('17.1 appelle GET /download/:shareToken', async () => {
+  it('17.1 calls GET /download/:shareToken', async () => {
     /* Arrange */
     mockGet.mockResolvedValueOnce({ data: { status: 'success', data: {} } });
 
@@ -32,7 +32,7 @@ describe('downloadApi.getMeta()', () => {
 
 /* ------------------------------------------------------------- download() */
 describe('downloadApi.download()', () => {
-  it('17.2 appelle POST /download/:shareToken sans password', async () => {
+  it('17.2 calls POST /download/:shareToken without password', async () => {
     /* Arrange */
     mockPost.mockResolvedValueOnce({ data: new Blob() });
 
@@ -47,7 +47,7 @@ describe('downloadApi.download()', () => {
     );
   });
 
-  it('17.3 appelle POST /download/:shareToken avec password', async () => {
+  it('17.3 calls POST /download/:shareToken with password', async () => {
     /* Arrange */
     mockPost.mockResolvedValueOnce({ data: new Blob() });
 

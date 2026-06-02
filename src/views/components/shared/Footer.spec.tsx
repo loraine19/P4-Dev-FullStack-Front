@@ -1,9 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import Footer from './Footer';
 
 describe('Footer', () => {
-  it('18.1 affiche le texte par défaut', () => {
+  it('18.1 renders default text', () => {
     /* Arrange / Act */
     render(<Footer />);
 
@@ -11,7 +11,7 @@ describe('Footer', () => {
     expect(screen.getByText('Copyright DataShare 2026')).toBeInTheDocument();
   });
 
-  it('18.2 affiche un texte personnalisé', () => {
+  it('18.2 renders custom text', () => {
     /* Arrange / Act */
     render(<Footer text="Mon texte footer" />);
 

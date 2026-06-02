@@ -1,4 +1,17 @@
-export interface FileItem {
+export interface UploadingFile {
+  file: File | null;
+  name: string;
+  error: string;
+}
+
+export interface UploadParams {
+  file: File;
+  expirationDays: number;
+  password?: string;
+  tagIds?: number[];
+}
+
+export interface FileItemDto {
   id: number;
   originalName: string;
   size: number;
@@ -8,11 +21,4 @@ export interface FileItem {
   expiresAt: string;
   createdAt: string;
   tags: { id: number; name: string }[];
-}
-
-export interface DownloadMeta {
-  filename: string;
-  size: number;
-  mimeType: string;
-  requiresPassword: boolean;
 }

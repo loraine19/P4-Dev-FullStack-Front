@@ -1,16 +1,18 @@
+import { useState } from 'react';
+import type { Tag } from '../../../types/tag.types';
 import Button from './Button';
 
 /* TAG COMPONENT PROPS */
-interface ITagComponentProps {
+interface TagComponentProps {
   id: string;
   label: string;
   placeholder?: string;
   value: string;
-  suggestions: string[];
-  tags: string[];
+  tags: Tag[];
+  selectedTags: Tag[];
+  setSelectedTags: (tags: Tag[]) => void;
   onChange: (nextValue: string) => void;
   onAdd: () => void;
-  onRemove: (tag: string) => void;
 }
 
 /* TAG COMPONENT */
@@ -19,49 +21,69 @@ const TagComponent = ({
   label,
   placeholder,
   value,
-  suggestions,
   tags,
+  selectedTags,
+  setSelectedTags,
   onChange,
   onAdd,
-  onRemove,
-}: ITagComponentProps) => {
+}: TagComponentProps) => {
+
+  const [showAddButton, setShowAddButton] = useState(false);
   return (
+   
     <div>
       <label className="form-label" htmlFor={id}>
         {label}
       </label>
       <div className="tag-row">
         <input
+        aria-label="Saisir un tag"
           id={id}
           className="form-input"
           type="text"
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => {
+            const val = event.target.value;
+            onChange(val);
+            const exist = tags.find((tag) => tag.name === val);
+            const alreadySelected = selectedTags.find((tag) => tag.name === val);
+            if (exist && !alreadySelected) {
+              setSelectedTags([...selectedTags, exist]);
+              onChange('');
+              setShowAddButton(false);
+            }
+            else setShowAddButton(val.length > 0 && !alreadySelected);
+          }}
           placeholder={placeholder}
           list={`${id}-suggestions`}
         />
-        <Button variant="plus" onClick={onAdd} aria-label="Ajouter le tag">
+        {showAddButton &&
+          <Button
+            variant="plus"
+            onClick={onAdd}
+            aria-label="Ajouter le tag">
           +
-        </Button>
+        </Button>}
       </div>
 
       <datalist id={`${id}-suggestions`}>
-        {suggestions.map((tag) => (
-          <option key={tag} value={tag} />
+        {tags.filter((tag) => !selectedTags.some((t) => t.id === tag.id)).map((tag) => (
+          <option key={tag.id} value={tag.name} />
         ))}
       </datalist>
 
-      {tags.length > 0 ? (
+      {selectedTags.length > 0 ? (
         <div className="chip-row" aria-label="Tags sélectionnés">
-          {tags.map((tag) => (
+          {[...new Set(selectedTags)].map((tag) => (
             <button
-              key={tag}
+              aria-label={`Retirer le tag ${tag.name}`}
+              title={`Retirer le tag ${tag.name}`}
+              key={`${tag.id}-chip`}
               type="button"
               className="chip chip-action"
-              onClick={() => onRemove(tag)}
-              aria-label={`Retirer le tag ${tag}`}
+              onClick={() => setSelectedTags(selectedTags.filter((t) => t.id !== tag.id))} 
             >
-              {tag} ×
+              {tag.name} ×
             </button>
           ))}
         </div>

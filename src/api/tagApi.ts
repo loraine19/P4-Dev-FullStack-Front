@@ -1,6 +1,6 @@
 import apiClient from './apiClient';
 import type { Tag } from '../types/tag.types';
-import type { ApiResponseEnvelope } from '../types/user.types';
+import type { ApiResponseEnvelope } from '../types/api.types';
 
 /* ITAG API INTERFACE */
 interface ITagApi {

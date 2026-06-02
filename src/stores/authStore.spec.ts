@@ -5,6 +5,7 @@ vi.mock('../services/authService', () => ({
     login:    vi.fn(),
     register: vi.fn(),
     logout:   vi.fn(),
+    me:       vi.fn(),
   },
 }));
 
@@ -22,8 +23,9 @@ import { authService } from '../services/authService';
 const mockLogin    = authService.login    as ReturnType<typeof vi.fn>;
 const mockRegister = authService.register as ReturnType<typeof vi.fn>;
 const mockLogout   = authService.logout   as ReturnType<typeof vi.fn>;
+const mockMe       = authService.me       as ReturnType<typeof vi.fn>;
 
-const RESET = { user: null, isAuthenticated: false, isLoading: false, error: null };
+const RESET = { user: null, isAuthenticated: false, isInitialized: false, isLoading: false, error: null };
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -38,7 +40,7 @@ describe('authStore -  login()', () => {
     mockLogin.mockResolvedValueOnce(user);
 
     /* Act */
-    const success = await useAuthStore.getState().login({ email: 'alice@test.com', password: 'pass123' });
+    const success = await useAuthStore.getState().login({ email: 'alice@test.com', password: 'Password1' });
 
     /* Assert */
     expect(success).toBe(true);
@@ -68,7 +70,7 @@ describe('authStore -  register()', () => {
     mockRegister.mockResolvedValueOnce({ success: true });
 
     /* Act */
-    const success = await useAuthStore.getState().register({ name: 'Alice', email: 'alice@test.com', password: 'pass123' });
+    const success = await useAuthStore.getState().register({ name: 'Alice', email: 'alice@test.com', password: 'Password1' });
 
     /* Assert */
     expect(success).toBe(true);
@@ -80,7 +82,7 @@ describe('authStore -  register()', () => {
     mockRegister.mockResolvedValueOnce({ level: 'error', message: 'Email déjà pris' });
 
     /* Act */
-    const success = await useAuthStore.getState().register({ name: 'Bob', email: 'taken@test.com', password: 'pass123' });
+    const success = await useAuthStore.getState().register({ name: 'Bob', email: 'taken@test.com', password: 'Password1' });
 
     /* Assert */
     expect(success).toBe(false);
@@ -101,6 +103,36 @@ describe('authStore -  logout()', () => {
     /* Assert */
     expect(useAuthStore.getState().user).toBeNull();
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
+  });
+});
+
+/* verifySession() */
+describe('authStore - verifySession()', () => {
+  it('2.7.1 me() returns user → isAuthenticated true, isInitialized true', async () => {
+    /* Arrange */
+    const user = { id: 1, email: 'alice@test.com', name: 'Alice' };
+    mockMe.mockResolvedValueOnce(user);
+
+    /* Act */
+    await useAuthStore.getState().verifySession();
+
+    /* Assert */
+    expect(useAuthStore.getState().isInitialized).toBe(true);
+    expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    expect(useAuthStore.getState().user).toEqual(user);
+  });
+
+  it('2.7.2 me() returns ErrorMsg → isAuthenticated false, isInitialized true', async () => {
+    /* Arrange */
+    mockMe.mockResolvedValueOnce({ level: 'error', message: 'Non autorisé' });
+
+    /* Act */
+    await useAuthStore.getState().verifySession();
+
+    /* Assert */
+    expect(useAuthStore.getState().isInitialized).toBe(true);
+    expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    expect(useAuthStore.getState().user).toBeNull();
   });
 });
 

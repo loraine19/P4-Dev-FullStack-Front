@@ -1,119 +1,92 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 import Button from '../shared/Button';
 import InputField from '../shared/forms/InputField';
 import SelectField from '../shared/forms/SelectField';
 import TagComponent from '../shared/TagComponent';
 import Callout from '../shared/Callout';
-import { fileService } from '../../../services/fileService';
-import { tagService } from '../../../services/tagService';
 import useFileStore from '../../../stores/fileStore';
-import useAuthStore from '../../../stores/authStore';
-import type { Tag } from '../../../types/tag.types';
+import useTagStore from '../../../stores/tagStore';
+import { ERROR_MESSAGES } from '../../../constants/error-messages';
+import { FILE_PASSWORD_MIN_LENGTH } from '../../../constants/upload';
 import type { ErrorMsg } from '../../../types/error.types';
-
-/* EXPIRATION OPTIONS (in days) */
-const EXPIRATION_OPTIONS = [
-  { value: '1', label: '1 jour' },
-  { value: '2', label: '2 jours' },
-  { value: '3', label: '3 jours' },
-  { value: '5', label: '5 jours' },
-  { value: '7', label: '7 jours' },
-];
+import { EXPIRATION_OPTIONS } from './options';
+import type { Tag } from '../../../types/tag.types';
 
 /* UPLOAD FORM */
 const UploadForm = () => {
   const navigate = useNavigate();
-  const addFile = useFileStore((s) => s.addFile);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  /* STORES */
+  const { upload, isLoading, error: fileError, shareToken, clearUploadingFile } = useFileStore(
+    useShallow((s) => ({
+      upload: s.upload,
+      isLoading: s.isLoading,
+      error: s.error,
+      shareToken: s.shareToken,
+      clearUploadingFile: s.clearUploadingFile,
+    })),
+  );
+  const { tags, addTagByName, errorTags, loadTags } = useTagStore(
+    useShallow((s) => ({ tags: s.tags, addTagByName: s.addTagByName, errorTags: s.errorTags, loadTags: s.loadTags })),
+  );
+
+  /* FORM STATE */
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [password, setPassword] = useState('');
   const [expirationDays, setExpirationDays] = useState('7');
   const [tagInput, setTagInput] = useState('');
-  const [selectedTagNames, setSelectedTagNames] = useState<string[]>([]);
-  const [userTags, setUserTags] = useState<Tag[]>([]);
-  const [error, setError] = useState<ErrorMsg | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<ErrorMsg | null>(null);
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
   /* LOAD TAGS */
   useEffect(() => {
-    tagService.getAll().then((result) => {
-      if (Array.isArray(result)) setUserTags(result);
-    });
-  }, []);
+    void loadTags();
+  }, [loadTags]);
 
-  /* TAG ACTIONS */
-  const normalizedTag = useMemo(() => tagInput.trim().toLowerCase(), [tagInput]);
-  const tagSuggestions = useMemo(() => userTags.map((t) => t.name), [userTags]);
+  /* PENDING FILE FROM UPLOAD BUTTON */
+  useEffect(() => {
+    const pending = useFileStore.getState().uploadingFile?.file ?? null;
+    if (!pending) return;
+    setSelectedFile(pending);
+    clearUploadingFile();
+  }, [clearUploadingFile]);
 
+  /* HANDLE ADD TAG */
   const handleAddTag = async () => {
-    if (!normalizedTag) return;
-    const existing = userTags.find((t) => t.name.toLowerCase() === normalizedTag);
-    if (existing) {
-      if (selectedTagNames.some((n) => n.toLowerCase() === normalizedTag)) return;
-      setSelectedTagNames((prev) => [...prev, existing.name]);
+    const newTag = await addTagByName(tagInput.trim());
+    if (newTag) {
+      setSelectedTags([...selectedTags, newTag]);
       setTagInput('');
-      return;
     }
-    const result = await tagService.create(tagInput.trim());
-    if ('level' in result) { setError(result); return; }
-    setUserTags((prev) => [...prev, result]);
-    setSelectedTagNames((prev) => [...prev, result.name]);
-    setTagInput('');
-  };
-
-  const handleRemoveTag = (tagToRemove: string) => {
-    setSelectedTagNames((prev) => prev.filter((t) => t !== tagToRemove));
   };
 
   /* SUBMIT */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    const file = selectedFile;
-    if (!file) {
-      setError({ message: 'Veuillez sélectionner un fichier.', level: 'error' });
+    setValidationError(null);
+    if (!selectedFile) {
+      setValidationError({ message: ERROR_MESSAGES.UPLOAD.NO_FILE, level: 'error' });
       return;
     }
-
-    const tagIds = selectedTagNames
-      .map((name) => userTags.find((t) => t.name === name)?.id)
-      .filter((id): id is number => id !== undefined);
-
-    // move to service: FormData construction belongs in uploadService, not in the component
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('expirationDays', expirationDays);
-    if (password) formData.append('downloadPassword', password);
-    tagIds.forEach((id) => formData.append('tags', String(id)));
-
-    setLoading(true);
-    const result = isAuthenticated
-      ? await fileService.uploadFile(formData)
-      : await fileService.uploadFileAnonymous(formData);
-    setLoading(false);
-
-    if (result && 'level' in result) {
-      setError(result);
+    if (password && password.length < FILE_PASSWORD_MIN_LENGTH) {
+      setValidationError({ message: ERROR_MESSAGES.UPLOAD.PASSWORD_TOO_SHORT(FILE_PASSWORD_MIN_LENGTH), level: 'error' });
       return;
     }
-    if (result) {
-      if (isAuthenticated) {
-        addFile(result);
-        navigate('/my-space');
-      } else {
-        setShareToken(result.shareToken);
-      }
-    }
+    const tagIds = selectedTags.map((tag) => tag.id);
+    const success = await upload({ file: selectedFile, expirationDays: Number(expirationDays), password, tagIds });
+    if (success && !useFileStore.getState().shareToken) navigate('/my-space');
   };
+
+  const displayError = validationError ?? fileError ?? errorTags;
 
   return (
     <section className="card center-block sheet-mobile" aria-label="Formulaire d'upload">
       <h2 className="card-title">Uploader un fichier</h2>
 
       <form className="form-grid" onSubmit={handleSubmit}>
-        {error && <Callout error={error} />}
+        {displayError && <Callout error={displayError} />}
 
         <InputField
           id="upload-file"
@@ -149,16 +122,16 @@ const UploadForm = () => {
           id="upload-tags"
           label="Tags"
           value={tagInput}
+          selectedTags={selectedTags}
+          setSelectedTags={setSelectedTags}
           onChange={setTagInput}
-          suggestions={tagSuggestions}
-          tags={selectedTagNames}
+          tags={tags}
           onAdd={handleAddTag}
-          onRemove={handleRemoveTag}
           placeholder="design, client, facture"
         />
 
-        <Button type="submit" variant="primary" disabled={loading}>
-          {loading ? 'Upload en cours…' : 'Générer un lien de partage'}
+        <Button type="submit" variant="primary" disabled={isLoading}>
+          {isLoading ? 'Upload en cours…' : 'Générer un lien de partage'}
         </Button>
       </form>
 

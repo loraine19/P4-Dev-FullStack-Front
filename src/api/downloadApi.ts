@@ -1,6 +1,6 @@
 import apiClient from './apiClient';
-import type { DownloadMeta } from '../types/file.types';
-import type { ApiResponseEnvelope } from '../types/user.types';
+import type { DownloadMeta } from '../types/download.types';
+import type { ApiResponseEnvelope } from '../types/api.types';
 
 /* IDOWNLOAD API INTERFACE */
 interface IDownloadApi {

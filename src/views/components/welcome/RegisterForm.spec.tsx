@@ -19,7 +19,7 @@ const renderRegisterForm = (onSwitch = vi.fn()) =>
   );
 
 describe('RegisterForm', () => {
-  it('27.1 affiche les champs name, email, password, passwordConfirm', () => {
+  it('27.1 renders name, email, password, passwordConfirm', () => {
     /* Arrange / Act */
     renderRegisterForm();
 
@@ -30,7 +30,7 @@ describe('RegisterForm', () => {
     expect(screen.getByLabelText('Vérification du mot de passe')).toBeInTheDocument();
   });
 
-  it('27.2 affiche le message d\'erreur du store', () => {
+  it('27.2 renders store error message', () => {
     /* Arrange */
     useAuthStore.setState({ error: { level: 'error', message: 'Email déjà utilisé' } });
 
@@ -41,7 +41,7 @@ describe('RegisterForm', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Email déjà utilisé');
   });
 
-  it('27.3 submit valide → appelle register avec name/email/password', async () => {
+  it('27.3 valid submit → calls register with name/email/password', async () => {
     /* Arrange */
     const mockRegister = vi.fn().mockResolvedValue(true);
     const onSwitch = vi.fn();
@@ -65,7 +65,7 @@ describe('RegisterForm', () => {
     );
   });
 
-  it('27.4 register réussi → appelle onSwitch', async () => {
+  it('27.4 register success → calls onSwitch', async () => {
     /* Arrange */
     const mockRegister = vi.fn().mockResolvedValue(true);
     const onSwitch = vi.fn();

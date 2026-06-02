@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import WelcomePage from './views/pages/WelcomePage';
 import MySpacePage from './views/pages/MySpacePage';
@@ -6,8 +7,13 @@ import DownloadPage from './views/pages/DownloadPage';
 import ProtectedRoute from './views/components/routing/ProtectedRoute';
 import ConfigPage from './views/components/routing/ConfigPage';
 import UploadRoute from './views/components/routing/UploadRoute';
+import useAuthStore from './stores/authStore';
 
 function App() {
+  useEffect(() => {
+    void useAuthStore.getState().verifySession();
+  }, []);
+
   return (
     <BrowserRouter>
       <Routes>

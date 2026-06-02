@@ -23,7 +23,7 @@ beforeEach(() => vi.clearAllMocks());
 
 /* ----------------------------------------------------------------- getAll() */
 describe('tagService.getAll()', () => {
-  it('T.1 réponse ok → retourne tableau de tags', async () => {
+  it('T.1 ok response → returns tag array', async () => {
     /* Arrange */
     const tags = [{ id: 1, name: 'react' }, { id: 2, name: 'node' }];
     mockGetAll.mockResolvedValueOnce(makeApiOk(tags));
@@ -35,7 +35,7 @@ describe('tagService.getAll()', () => {
     expect(result).toEqual(tags);
   });
 
-  it('T.2 data null → retourne tableau vide', async () => {
+  it('T.2 null data → returns empty array', async () => {
     /* Arrange */
     mockGetAll.mockResolvedValueOnce(makeApiOk(null));
 
@@ -46,7 +46,7 @@ describe('tagService.getAll()', () => {
     expect(result).toEqual([]);
   });
 
-  it('T.3 erreur réseau → ErrorMsg', async () => {
+  it('T.3 network error → ErrorMsg', async () => {
     /* Arrange */
     mockGetAll.mockRejectedValueOnce({ response: { status: 500 } });
 
@@ -60,7 +60,7 @@ describe('tagService.getAll()', () => {
 
 /* ----------------------------------------------------------------- create() */
 describe('tagService.create()', () => {
-  it('T.4 création ok → retourne Tag', async () => {
+  it('T.4 create ok → returns Tag', async () => {
     /* Arrange */
     const tag = { id: 3, name: 'typescript' };
     mockCreate.mockResolvedValueOnce(makeApiOk(tag));
@@ -73,7 +73,7 @@ describe('tagService.create()', () => {
     expect(mockCreate).toHaveBeenCalledWith('typescript');
   });
 
-  it('T.5 doublon → ErrorMsg 409', async () => {
+  it('T.5 duplicate → ErrorMsg 409', async () => {
     /* Arrange */
     mockCreate.mockRejectedValueOnce({ response: { status: 409 } });
 
@@ -87,7 +87,7 @@ describe('tagService.create()', () => {
 
 /* ----------------------------------------------------------------- remove() */
 describe('tagService.remove()', () => {
-  it('T.6 suppression ok → résout sans valeur', async () => {
+  it('T.6 delete ok → resolves void', async () => {
     /* Arrange */
     mockRemove.mockResolvedValueOnce({});
 
@@ -99,7 +99,7 @@ describe('tagService.remove()', () => {
     expect(mockRemove).toHaveBeenCalledWith(1);
   });
 
-  it('T.7 erreur 403 → ErrorMsg', async () => {
+  it('T.7 403 error → ErrorMsg', async () => {
     /* Arrange */
     mockRemove.mockRejectedValueOnce({ response: { status: 403 } });
 

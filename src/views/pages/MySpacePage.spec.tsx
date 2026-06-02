@@ -6,19 +6,13 @@ import { MemoryRouter } from 'react-router-dom';
 vi.mock('../../services/fileService', () => ({
   fileService: { getMyFiles: vi.fn(), deleteFile: vi.fn() },
 }));
-vi.mock('@project-lary/react-material-symbols', () => ({
-  Description: () => null,
-  Lock: () => null,
-  MoreVert: () => null,
-}));
-
 import MySpacePage from './MySpacePage';
 import { fileService } from '../../services/fileService';
 import useFileStore from '../../stores/fileStore';
 import useAuthStore from '../../stores/authStore';
+import type { FileItemDto } from '../../types/file.types';
 
 const mockGetMyFiles = fileService.getMyFiles as ReturnType<typeof vi.fn>;
-const mockDeleteFile = fileService.deleteFile as ReturnType<typeof vi.fn>;
 
 const FUTURE = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -30,6 +24,8 @@ const makeFile = (id: number, name: string, overrides = {}) => ({
   passwordProtected: false,
   tags: [],
   size: 512,
+  mimeType: 'text/plain',
+  createdAt: new Date().toISOString(),
   ...overrides,
 });
 
@@ -43,9 +39,14 @@ const renderMySpace = () =>
   render(<MemoryRouter><MySpacePage /></MemoryRouter>);
 
 describe('MySpacePage', () => {
-  it('30.1 affiche la liste des fichiers chargés', async () => {
+  it('30.1 renders loaded file list', async () => {
     /* Arrange */
-    const files = [makeFile(1, 'rapport.pdf'), makeFile(2, 'photo.png')];
+    const file1: FileItemDto = makeFile(1, 'rapport.pdf', { mimeType: 'application/pdf' });
+    const file2 : FileItemDto = makeFile(2, 'photo.png', { mimeType: 'image/png' });
+    const files: FileItemDto[] = [
+      file1,
+      file2,
+    ];
     mockGetMyFiles.mockResolvedValueOnce(files);
     useFileStore.setState({ files, setFiles: (f: typeof files) => useFileStore.setState({ files: f }), removeFile: vi.fn(), addFile: vi.fn() });
 
@@ -57,7 +58,7 @@ describe('MySpacePage', () => {
     expect(screen.getByText('photo.png')).toBeInTheDocument();
   });
 
-  it('30.2 affiche les onglets de filtre', async () => {
+  it('30.2 renders filter tabs', async () => {
     /* Arrange */
     mockGetMyFiles.mockResolvedValueOnce([]);
 
@@ -70,7 +71,7 @@ describe('MySpacePage', () => {
     expect(screen.getByText('Expiré')).toBeInTheDocument();
   });
 
-  it('30.3 affiche un message quand aucun fichier', async () => {
+  it('30.3 shows message when no files', async () => {
     /* Arrange */
     mockGetMyFiles.mockResolvedValueOnce([]);
     useFileStore.setState({ files: [], setFiles: vi.fn(), removeFile: vi.fn(), addFile: vi.fn() });
@@ -84,7 +85,7 @@ describe('MySpacePage', () => {
     );
   });
 
-  it('30.4 ouvre la sidebar au clic sur le burger', async () => {
+  it('30.4 opens sidebar on burger click', async () => {
     /* Arrange */
     mockGetMyFiles.mockResolvedValueOnce([]);
     renderMySpace();
@@ -96,7 +97,7 @@ describe('MySpacePage', () => {
     expect(screen.getByRole('complementary')).toHaveClass('is-open');
   });
 
-  it('30.5 filtre les fichiers actifs', async () => {
+  it('30.5 filters active files', async () => {
     /* Arrange */
     const PAST = new Date(Date.now() - 86400000).toISOString();
     const files = [makeFile(1, 'actif.txt'), makeFile(2, 'expire.txt', { expiresAt: PAST })];

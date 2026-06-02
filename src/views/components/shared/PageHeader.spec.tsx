@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import PageHeader from './PageHeader';
 
 describe('PageHeader', () => {
-  it('20.1 affiche le titre', () => {
+  it('20.1 renders title', () => {
     /* Arrange / Act */
     render(<PageHeader title="Mon titre" />);
 
@@ -11,7 +11,7 @@ describe('PageHeader', () => {
     expect(screen.getByRole('heading', { name: 'Mon titre' })).toBeInTheDocument();
   });
 
-  it('20.2 affiche le sous-titre quand fourni', () => {
+  it('20.2 renders subtitle when provided', () => {
     /* Arrange / Act */
     render(<PageHeader title="Titre" subtitle="Mon sous-titre" />);
 
@@ -19,7 +19,7 @@ describe('PageHeader', () => {
     expect(screen.getByText('Mon sous-titre')).toBeInTheDocument();
   });
 
-  it('20.3 n\'affiche pas de sous-titre si absent', () => {
+  it('20.3 hides subtitle when absent', () => {
     /* Arrange / Act */
     render(<PageHeader title="Titre" />);
 

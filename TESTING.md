@@ -8,7 +8,7 @@
 
 [2\. Tests unitaires - Vitest](#2.-tests-unitaires-- -vitest)
 
-[a. 37 fichiers - 165/165 ✅](#37-fichiers-- -165/165-✅)
+[a. 41 fichiers - 203/203 ✅](#41-fichiers-- -203/203-✅)
 
 [b. Commandes](#commandes)
 
@@ -43,7 +43,7 @@
 
 # 2\. Tests unitaires - Vitest {#2.-tests-unitaires-- -vitest}
 
-1. ## 37 fichiers - 165/165 ✅ {#37-fichiers-- -165/165-✅}
+1. ## 41 fichiers - 203/203 ✅ {#41-fichiers-- -203/203-✅}
 
 | N° TEST_PLAN | Suite                     | Fichier                                      | Domaine        |
 | :----------: | :------------------------ | :------------------------------------------- | :------------- |
@@ -51,6 +51,7 @@
 |      2       | authStore                 | `stores/authStore.spec.ts`                   | Store          |
 |      3       | fileStore                 | `stores/fileStore.spec.ts`                   | Store          |
 |      4       | tagStore                  | `stores/tagStore.spec.ts`                    | Store          |
+|      -       | downloadStore             | `stores/downloadStore.spec.ts`               | Store          |
 |      5       | tokenStorage              | `infrastructure/tokenStorage.spec.ts`        | Infrastructure |
 |      6       | Button                    | `components/Button.spec.tsx`                 | UI             |
 |      7       | Callout                   | `components/Callout.spec.tsx`                | UI             |
@@ -95,15 +96,15 @@
 
 1. ## 7 fichiers - 26/26 ✅ {#7-fichiers-- -26/26-✅}
 
-| Fichier                      | Parcours                                                       | Tests  |
-| :--------------------------- | :------------------------------------------------------------- | :----: |
-| `01-auth.cy.ts`              | Parcours 1 - Authentification (register, login, accès protégé) |   7    |
-| `02-upload.cy.ts`            | Parcours 2 - Upload fichier (succès \+ extension interdite)    |   5    |
-| `03-myspace.cy.ts`           | Parcours 3 - Espace personnel (liste, suppression)             |   2    |
-| `04-download.cy.ts`          | Parcours 4 - Download via lien public                          |   4    |
-| `05-download-password.cy.ts` | Parcours 5 - Download fichier protégé par mot de passe         |   3    |
-| `06-upload-anon.cy.ts`       | Parcours 6 - Upload anonyme                                    |   1    |
-| `07-tags.cy.ts`              | Parcours 7 - Tags (création, association, suppression)         |   4    |
+| Fichier                      | Flow (describe)                                    | Tests  |
+| :--------------------------- | :------------------------------------------------- | :----: |
+| `01-auth.cy.ts`              | Flow 1 - Auth (register, login, protected route)   |   7    |
+| `02-upload.cy.ts`            | Flow 2 - Upload (success + forbidden extension)    |   5    |
+| `03-myspace.cy.ts`           | Flow 3 - My space (list, delete)                   |   2    |
+| `04-download.cy.ts`          | Flow 4 - Public download link                      |   4    |
+| `05-download-password.cy.ts` | Flow 5 - Password-protected download               |   3    |
+| `06-upload-anon.cy.ts`       | Flow 6 - Anonymous upload                          |   1    |
+| `07-tags.cy.ts`              | Flow 7 - Tags (create, attach, remove)             |   4    |
 | **Total**                    |                                                                | **26** |
 
 2. ## Stratégie technique {#stratégie-technique}
@@ -151,7 +152,7 @@ Rapport HTML : `coverage-unit/lcov-report/index.html`
 
 | Critère                |       Seuil        |  Résultat   |
 | :--------------------- | :----------------: | :---------: |
-| Tests unitaires Vitest |     100% pass      | ✅ 165/165  |
+| Tests unitaires Vitest |     100% pass      | ✅ 203/203  |
 | Tests E2E Cypress      |     100% pass      |  ✅ 26/26   |
 | Coverage statements    |       ≥ 70%        |  ✅ 74.73%  |
 | Coverage lines         |       ≥ 70%        |  ✅ 77.64%  |

@@ -19,7 +19,7 @@ const mockDownload = downloadService.download as ReturnType<typeof vi.fn>;
 beforeEach(() => vi.clearAllMocks());
 
 describe('DownloadForm', () => {
-  it('28.1 affiche le callout d\'erreur si getMeta échoue', async () => {
+  it('28.1 shows error callout when getMeta fails', async () => {
     /* Arrange */
     mockGetMeta.mockResolvedValueOnce({ level: 'error', message: 'Lien invalide ou expiré' });
 
@@ -32,7 +32,7 @@ describe('DownloadForm', () => {
     );
   });
 
-  it('28.2 affiche le nom de fichier et le bouton Télécharger si getMeta réussit', async () => {
+  it('28.2 shows filename and Download if getMeta succeeds', async () => {
     /* Arrange */
     mockGetMeta.mockResolvedValueOnce({
       filename: 'rapport.pdf',
@@ -48,7 +48,7 @@ describe('DownloadForm', () => {
     expect(screen.getByRole('button', { name: /Télécharger/ })).toBeInTheDocument();
   });
 
-  it('28.3 affiche le champ password si requiresPassword=true', async () => {
+  it('28.3 shows password field when requiresPassword=true', async () => {
     /* Arrange */
     mockGetMeta.mockResolvedValueOnce({
       filename: 'secret.pdf',
@@ -63,7 +63,7 @@ describe('DownloadForm', () => {
     await waitFor(() => expect(screen.getByLabelText('Mot de passe')).toBeInTheDocument());
   });
 
-  it('28.4 appelle downloadService.download au submit', async () => {
+  it('28.4 calls downloadService.download on submit', async () => {
     /* Arrange */
     mockGetMeta.mockResolvedValueOnce({
       filename: 'rapport.pdf',

@@ -1,54 +1,48 @@
-/* PARCOURS 4 -  Téléchargement via lien public (sans mot de passe) */
+/* FLOW 4 - Public download link (no password) */
 
-const TS = Date.now();
-const USER = {
+const TS4 = Date.now();
+const USERT4 = {
   name: 'Cypress Download',
-  email: `cypress-dl-${TS}@test.local`,
+  email: `cypress-dl-${TS4}@test.local`,
   password: 'Password1!',
 };
-const FILENAME = `download-public-${TS}.txt`;
+const FILENAME4 = `download-public-${TS4}.txt`;
 
-describe('Parcours 4 -  Download via lien public', () => {
+describe('Flow 4 - Public download', () => {
   let shareToken: string;
 
   before(() => {
-    cy.registerViaApi(USER.name, USER.email, USER.password);
-    cy.task<string>('loginForTask', { email: USER.email, password: USER.password })
+    cy.registerViaApi(USERT4.name, USERT4.email, USERT4.password);
+    cy.task<string>('loginForTask', { email: USERT4.email, password: USERT4.password })
       .then((token) =>
-        cy.task<{ shareToken: string }>('uploadTestFile', { token, filename: FILENAME }),
+        cy.task<{ shareToken: string }>('uploadTestFile', { token, filename: FILENAME4 }),
       )
       .then((file) => { shareToken = file.shareToken; });
   });
 
-  it('4.1 Page download accessible + métadonnées visibles', () => {
+  it('4.1 Download page accessible + metadata visible', () => {
     cy.visit(`/download/${shareToken}`);
-    // metadata callout: "Fichier : filename -  x Ko"
-    cy.contains(FILENAME).should('be.visible');
-    // no password field (file is public)
+    cy.contains(FILENAME4).should('be.visible');
     cy.get('#download-password').should('not.exist');
     cy.contains('button', 'Télécharger').should('be.visible');
   });
 
-  it('4.2 Cliquer Télécharger → requête POST 200 + téléchargement déclenché', () => {
+  it('4.2 Click Download → POST 200 + download triggered', () => {
     cy.visit(`/download/${shareToken}`);
-
-    // intercept the download API call
     cy.intercept('POST', `**/download/${shareToken}`).as('download');
-
     cy.contains('button', 'Télécharger').click();
-
     cy.wait('@download').its('response.statusCode').should('eq', 200);
   });
 
-  it('4.3 Token invalide → message erreur (lien expiré/invalide)', () => {
+  it('4.3 Invalid token → error message (expired/invalid link)', () => {
     cy.visit('/download/token-invalide-000');
     cy.get('[class*="callout"]').should('exist');
     cy.contains('button', 'Télécharger').should('not.exist');
   });
 
-  it('8.2 Lien expiré → message d\'erreur affiché', () => {
-    /* Arrange -  intercept GET to simulate 410 Gone */
-    cy.intercept('GET', '**/download/expired-link-test', {
+  it('8.2 Expired link → error message shown', () => {
+    /* Arrange */
+    cy.intercept('GET', '**/api/v1/download/expired-link-test', {
       statusCode: 410,
       body: { status: 'error', message: 'Ce lien a expiré.' },
     }).as('getExpiredMeta');

@@ -3,6 +3,7 @@ import type { Rule, FieldErrors, FieldRules, FieldValues } from '../../../../uti
 import { validate, validateAll } from '../../../../utils/fieldValidation';
 import InputField from './InputField';
 import Button from '../Button';
+import Callout from '../Callout';
 
 /* INPUT CONFIG */
 export type InputConfig<T extends string> = {
@@ -92,12 +93,7 @@ const Form = <T extends string>({
             error={errors[input.name]}
           />
         ))}
-        { /* CALL OUT ERROR */}
-        {error ? (
-          <div className="callout callout-error" role="alert">
-            {error}
-          </div>
-        ) : null}
+        <Callout message={error} variant="error" />
         <Button variant="primary" type="submit" disabled={loading}>
           {loading ? `${submitLabel}...` : submitLabel}
         </Button>

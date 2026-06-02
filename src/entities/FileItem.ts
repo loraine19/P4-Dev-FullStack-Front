@@ -1,4 +1,4 @@
-import type { FileItem as FileItemDto } from '../types/file.types';
+import type { FileItemDto } from '../types/file.types';
 
 /* FILE ENTITY */
 export class FileItem {
@@ -48,5 +48,15 @@ export class FileItem {
   /* DISPLAY NAME */
   displayName(): string {
     return this.originalName;
+  }
+
+  /* FORMAT EXPIRY */
+  // returns human-readable expiry label for display
+  formatExpiry(): string {
+    const days = this.daysRemaining();
+    if (days < 0) return 'Expiré';
+    if (days === 0) return "Expire aujourd'hui";
+    if (days === 1) return 'Expire demain';
+    return `Expire dans ${days} jours`;
   }
 }

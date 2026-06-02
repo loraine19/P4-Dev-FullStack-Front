@@ -19,7 +19,7 @@ beforeEach(() => vi.clearAllMocks());
 
 /* ---------------------------------------------------------------- getAll() */
 describe('fileApi.getAll()', () => {
-  it('15.1 appelle GET /files', async () => {
+  it('15.1 calls GET /files', async () => {
     /* Arrange */
     mockGet.mockResolvedValueOnce({ data: { status: 'success', data: [] } });
 
@@ -33,7 +33,7 @@ describe('fileApi.getAll()', () => {
 
 /* --------------------------------------------------------------- upload() */
 describe('fileApi.upload()', () => {
-  it('15.2 appelle POST /files avec multipart/form-data', async () => {
+  it('15.2 calls POST /files with multipart/form-data', async () => {
     /* Arrange */
     const formData = new FormData();
     mockPost.mockResolvedValueOnce({ data: { status: 'success', data: {} } });
@@ -50,7 +50,7 @@ describe('fileApi.upload()', () => {
 
 /* --------------------------------------------------------------- remove() */
 describe('fileApi.remove()', () => {
-  it('15.3 appelle DELETE /files/:id', async () => {
+  it('15.3 calls DELETE /files/:id', async () => {
     /* Arrange */
     mockDelete.mockResolvedValueOnce({ data: { status: 'success', data: null } });
 

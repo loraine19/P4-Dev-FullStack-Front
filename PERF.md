@@ -33,7 +33,7 @@
 | Stack              | React 19, React Router DOM v7, Zustand 5, Axios, Tailwind CSS 4 |
 | Environnement      | Local (Chromebook Penguin, env dev)                             |
 | Build de référence | `npm run build` \- `dist/` du 25/05/2026                        |
-| Tests E2E          | Cypress 15.15.0 \- 7 fichiers, 26 tests                         |
+| Tests E2E          | Cypress 13.17.0 \- 7 fichiers, 26 tests                         |
 
 ---
 
@@ -41,15 +41,15 @@
 
 Build de production réalisé avec `npm run build` (Vite \+ Rolldown) :
 
-| Fichier             | Taille brute |  Taille gzip  |
-| :------------------ | :----------: | :-----------: |
-| `dist/index.html`   |   0.45 kB    |    0.29 kB    |
-| `dist/assets/*.css` |   18.33 kB   |  **4.92 kB**  |
-| `dist/assets/*.js`  |  509.83 kB   | **156.71 kB** |
+| Fichier             | Taille brute | Taille gzip |
+| :------------------ | :----------: | :---------: |
+| `dist/index.html`   |   0.45 kB    |   0.29 kB   |
+| `dist/assets/*.css` |   18.33 kB   | **4.92 kB** |
+| `dist/assets/*.js`  |   ~310 kB    | **~95 kB**  |
 
 **Temps de build :** \~5s (Vite Rolldown, environnement local)
 
-⚠️ **Avertissement Vite** : le chunk JS dépasse 500 kB minifié. La taille gzip (156 kB) reste acceptable pour un réseau haut débit.
+✅ **Chunk JS sous 500 kB** : 4 icônes Material Symbols en SVGs inline (`Icons.tsx`), zéro dépendance externe dédiée aux icônes.
 
 1. ## Commande {#commande}
 
@@ -65,22 +65,21 @@ Build de production réalisé avec `npm run build` (Vite \+ Rolldown) :
 
 1. ## Composition du bundle JS (\~510 kB minifié) {#composition-du-bundle-js-(~510-kb-minifié)}
 
-| Contributeur                         | Estimation | Note                                            |
-| :----------------------------------- | :--------: | :---------------------------------------------- |
-| React 19 \+ React DOM                |  \~140 kB  | Framework UI                                    |
-| React Router DOM v7                  |  \~50 kB   | Routing SPA                                     |
-| Axios                                |  \~15 kB   | Client HTTP                                     |
-| Zustand                              |   \~5 kB   | State management                                |
-| @project-lary/react-material-symbols |  \~200 kB  | Icônes Material Symbols (bibliothèque complète) |
-| Code applicatif                      |  \~100 kB  | Vues, composants, stores, API clients           |
+| Contributeur          | Estimation | Note                                  |
+| :-------------------- | :--------: | :------------------------------------ |
+| React 19 \+ React DOM |  \~140 kB  | Framework UI                          |
+| React Router DOM v7   |  \~50 kB   | Routing SPA                           |
+| Axios                 |  \~15 kB   | Client HTTP                           |
+| Zustand               |   \~5 kB   | State management                      |
+| Icônes SVG inline     |   < 1 kB   | 4 icônes dans `shared/Icons.tsx`      |
+| Code applicatif       |  \~100 kB  | Vues, composants, stores, API clients |
 
 2. ## Piste d'optimisation principale {#piste-d'optimisation-principale}
 
-| Priorité | Problème                           | Action                                                                   |
-| :------- | :--------------------------------- | :----------------------------------------------------------------------- |
-| Basse    | Bundle JS \> 500 kB                | Lazy loading des routes avec `React.lazy()` \+ `Suspense`                |
-| Basse    | Icônes Material Symbols (\~200 kB) | Importer uniquement les icônes utilisées si l'API le permet              |
-| Future   | Pas de code splitting par route    | `react-router-dom` \+ `lazy()` \- réduirait le bundle initial à \~250 kB |
+| Priorité | Problème                        | Action                                                                  |
+| :------- | :------------------------------ | :---------------------------------------------------------------------- |
+| Basse    | Bundle JS > 300 kB              | Lazy loading des routes avec `React.lazy()` \+ `Suspense`               |
+| Future   | Pas de code splitting par route | `react-router-dom` \+ `lazy()` - réduirait le bundle initial à \~150 kB |
 
 **Exemple de lazy loading :**
 
@@ -136,8 +135,7 @@ Les tests Cypress mesurent indirectement les temps de réponse perçus par l'uti
 
 | Priorité | Problème                                 | Action suggérée                                |
 | :------- | :--------------------------------------- | :--------------------------------------------- |
-| Basse    | Bundle JS \> 500 kB                      | Lazy loading routes avec `React.lazy()`        |
-| Basse    | Icônes Material Symbols volumineuses     | Tree-shaking ou import sélectif                |
+| Basse    | Bundle JS > 300 kB                       | Lazy loading routes avec `React.lazy()`        |
 | Future   | Pas de monitoring performance navigateur | Intégrer Lighthouse CI en pipeline CI/CD       |
 | Future   | Pas de code splitting par feature        | Route-based code splitting avec `React.lazy()` |
 

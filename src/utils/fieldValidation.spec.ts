@@ -17,7 +17,7 @@ const pwMinMsg = REGISTER_INPUTS.find((i) => i.name === 'password')!.rules[1].me
 
 describe('RULES - factories', () => {
   describe('required()', () => {
-    it('rejette valeur vide ou espace seul', () => {
+    it('rejects empty or whitespace-only value', () => {
       /* Arrange */
       const rule = RULES.required('Champ obligatoire');
       /* Act & Assert */
@@ -26,7 +26,7 @@ describe('RULES - factories', () => {
       expect(rule.message).toBe('Champ obligatoire');
     });
 
-    it('accepte une valeur non vide', () => {
+    it('accepts non-empty value', () => {
       /* Arrange */
       const rule = RULES.required('Champ obligatoire');
       /* Act & Assert */
@@ -35,14 +35,14 @@ describe('RULES - factories', () => {
   });
 
   describe('email()', () => {
-    it('valide une adresse email correcte', () => {
+    it('accepts valid email address', () => {
       /* Arrange */
       const rule = RULES.email('Email invalide');
       /* Act & Assert */
       expect(rule.test('alice@example.com')).toBe(true);
     });
 
-    it('rejette une adresse malformée (sans @, sans domaine)', () => {
+    it('rejects malformed email (no @, no domain)', () => {
       /* Arrange */
       const rule = RULES.email('Email invalide');
       /* Act & Assert */
@@ -52,7 +52,7 @@ describe('RULES - factories', () => {
   });
 
   describe('minLen()', () => {
-    it('valide si longueur ≥ n', () => {
+    it('accepts when length >= n', () => {
       /* Arrange */
       const rule = RULES.minLen(8, 'Min 8');
       /* Act & Assert */
@@ -60,7 +60,7 @@ describe('RULES - factories', () => {
       expect(rule.test('12345678')).toBe(true);
     });
 
-    it('rejette si longueur < n', () => {
+    it('rejects when length < n', () => {
       /* Arrange */
       const rule = RULES.minLen(8, 'Min 8');
       /* Act & Assert */
@@ -69,14 +69,14 @@ describe('RULES - factories', () => {
   });
 
   describe('matches()', () => {
-    it('valide si les deux champs sont identiques', () => {
+    it('accepts when both fields match', () => {
       /* Arrange */
       const rule = RULES.matches('password', 'Mots de passe non identiques');
       /* Act & Assert */
       expect(rule.test('abc123', { password: 'abc123' })).toBe(true);
     });
 
-    it('rejette si les champs diffèrent ou si la référence est absente', () => {
+    it('rejects when fields differ or reference missing', () => {
       /* Arrange */
       const rule = RULES.matches('password', 'Mots de passe non identiques');
       /* Act & Assert */
@@ -87,7 +87,7 @@ describe('RULES - factories', () => {
 });
 
 describe('1 - validateLoginField()', () => {
-  it('1.1.1 champs valides → pas de message d\'erreur', () => {
+  it('1.1.1 valid fields → no error messages', () => {
     /* Arrange */
     const values = { email: 'alice@test.com', password: 'password123' };
 
@@ -99,7 +99,7 @@ describe('1 - validateLoginField()', () => {
     expect(errors.password).toBe('');
   });
 
-  it('1.1.2 email vide / format invalide → message d\'erreur', () => {
+  it('1.1.2 empty/invalid email → error message', () => {
     /* Arrange */
     const emptyEmail  = { email: '',             password: 'password' };
     const badFmtEmail = { email: 'not-an-email', password: 'password' };
@@ -113,7 +113,7 @@ describe('1 - validateLoginField()', () => {
     expect(errorsBadFmt.email).toBeTruthy();
   });
 
-  it('1.1.3 password vide → message d\'erreur', () => {
+  it('1.1.3 empty password → error message', () => {
     /* Arrange */
     const values = { email: 'alice@test.com', password: '' };
 
@@ -127,7 +127,7 @@ describe('1 - validateLoginField()', () => {
 
 
 describe('2 - validateRegisterField()', () => {
-  it('1.2.1 tous champs valides → chaîne vide pour chaque champ', () => {
+  it('1.2.1 all valid fields → empty string per field', () => {
     /* Arrange */
     const values = {
       name:            'alice',
@@ -146,7 +146,7 @@ describe('2 - validateRegisterField()', () => {
     expect(errors.passwordConfirm).toBe('');
   });
 
-  it('1.2.2 pw < 8 / passwordConfirm ≠ pw / username vide → messages d\'erreur', () => {
+  it('1.2.2 pw < 8 / mismatch / empty name → error messages', () => {
     /* Arrange */
     const values = {
       name:            '',
@@ -167,7 +167,7 @@ describe('2 - validateRegisterField()', () => {
 
 
 describe('3 - FieldValidator (validate / validateAll)', () => {
-  it('1.3.1 validate() retourne la 1ère erreur · validateAll() retourne l\'objet complet', () => {
+  it('1.3.1 validate() first error · validateAll() full object', () => {
     /* Arrange */
     const singleRules = [RULES.required('Obligatoire'), RULES.minLen(8, 'Min 8')];
     const formValues  = { name: '', tag: 'hi' };

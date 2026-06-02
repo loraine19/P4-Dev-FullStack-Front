@@ -8,7 +8,7 @@ const OPTIONS = [
 ];
 
 describe('SelectField', () => {
-  it('25.1 affiche le label et le select', () => {
+  it('25.1 renders label and select', () => {
     /* Arrange / Act */
     render(<SelectField id="exp" label="Expiration" options={OPTIONS} />);
 
@@ -16,7 +16,7 @@ describe('SelectField', () => {
     expect(screen.getByLabelText('Expiration')).toBeInTheDocument();
   });
 
-  it('25.2 affiche toutes les options', () => {
+  it('25.2 renders all options', () => {
     /* Arrange / Act */
     render(<SelectField id="exp" label="Expiration" options={OPTIONS} />);
 
@@ -25,7 +25,7 @@ describe('SelectField', () => {
     expect(screen.getByRole('option', { name: '7 jours' })).toBeInTheDocument();
   });
 
-  it('25.3 affiche le message d\'erreur', () => {
+  it('25.3 renders error message', () => {
     /* Arrange / Act */
     render(<SelectField id="exp" label="Expiration" options={OPTIONS} error="Champ requis" />);
 

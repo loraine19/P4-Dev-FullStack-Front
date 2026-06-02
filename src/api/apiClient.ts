@@ -16,7 +16,7 @@ apiClient.interceptors.request.use((config) => {
 });
 
 /* RESPONSE INTERCEPTOR */
-// 401 -  clear token and redirect to welcome, except on login requests
+// 401 - clear token and redirect to welcome, except on login requests
 apiClient.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
@@ -24,13 +24,15 @@ apiClient.interceptors.response.use(
     const status = isAxios ? error.response?.status : null;
     const requestUrl = isAxios ? error.config?.url ?? '' : '';
     const isLoginRequest = requestUrl.includes('/auth/login');
+    // session probe — 401 is expected when not logged in; verifySession handles it
+    const isMeRequest = requestUrl.includes('/auth/me');
 
-    // download endpoint uses 401 for wrong password -  public route, not a session error
+    // download endpoint uses 401 for wrong password - public route, not a session error
     const isDownloadRequest = requestUrl.includes('/download/');
 
     if (status === 401 && !isDownloadRequest) {
       tokenStorage.remove();
-      if (!isLoginRequest) {
+      if (!isLoginRequest && !isMeRequest) {
         window.location.href = '/';
       }
     }

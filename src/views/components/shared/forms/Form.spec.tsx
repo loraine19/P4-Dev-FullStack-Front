@@ -139,12 +139,12 @@ describe('Form', () => {
 
       /* Act */
       await userEvent.type(screen.getByLabelText('Email'), 'alice@test.com');
-      await userEvent.type(screen.getByLabelText('Mot de passe'), 'secret');
+      await userEvent.type(screen.getByLabelText('Mot de passe'), 'secret12');
       await userEvent.click(screen.getByRole('button', { name: SUBMIT_LABEL }));
 
       /* Assert */
       await waitFor(() =>
-        expect(mockSubmit).toHaveBeenCalledWith({ email: 'alice@test.com', password: 'secret' }),
+        expect(mockSubmit).toHaveBeenCalledWith({ email: 'alice@test.com', password: 'secret12' }),
       );
     });
   });

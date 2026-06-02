@@ -16,7 +16,7 @@ module.exports = defineConfig({
     },
     setupNodeEvents(on) {
       on('task', {
-        /* login via isMobile:true → returns Bearer token */
+        /* login via isMobile:true - returns Bearer token */
         async loginForTask({ email, password }) {
           const res = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
@@ -57,4 +57,3 @@ module.exports = defineConfig({
     },
   },
 });
-

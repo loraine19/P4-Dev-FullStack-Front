@@ -51,12 +51,12 @@ describe('LoginForm', () => {
 
     /* Act */
     await userEvent.type(screen.getByLabelText('Email'), 'alice@test.com');
-    await userEvent.type(screen.getByLabelText('Mot de passe'), 'secret');
+    await userEvent.type(screen.getByLabelText('Mot de passe'), 'secretMdp');
     await userEvent.click(screen.getByRole('button', { name: 'Connexion' }));
 
     /* Assert */
     await waitFor(() =>
-      expect(mockLogin).toHaveBeenCalledWith({ email: 'alice@test.com', password: 'secret' }),
+      expect(mockLogin).toHaveBeenCalledWith({ email: 'alice@test.com', password: 'secretMdp' }),
     );
   });
 });

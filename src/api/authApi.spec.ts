@@ -18,9 +18,9 @@ beforeEach(() => vi.clearAllMocks());
 
 /* ----------------------------------------------------------------- login() */
 describe('authApi.login()', () => {
-  it('14.1 appelle POST /auth/login avec les credentials', async () => {
+  it('14.1 calls POST /auth/login with credentials', async () => {
     /* Arrange */
-    const payload = { email: 'a@test.com', password: 'pass' };
+    const payload = { email: 'a@test.com', password: 'Password1' };
     mockPost.mockResolvedValueOnce({ data: { status: 'success', data: {} } });
 
     /* Act */
@@ -33,9 +33,9 @@ describe('authApi.login()', () => {
 
 /* --------------------------------------------------------------- register() */
 describe('authApi.register()', () => {
-  it('14.2 appelle POST /auth/register avec name/email/password', async () => {
+  it('14.2 calls POST /auth/register with name/email/password', async () => {
     /* Arrange */
-    const payload = { name: 'Alice', email: 'a@test.com', password: 'pass', passwordConfirm: 'pass' };
+    const payload = { name: 'Alice', email: 'a@test.com', password: 'Password1', passwordConfirm: 'Password1' };
     mockPost.mockResolvedValueOnce({ data: { status: 'success', data: null } });
 
     /* Act */
@@ -48,7 +48,7 @@ describe('authApi.register()', () => {
 
 /* ---------------------------------------------------------------- logout() */
 describe('authApi.logout()', () => {
-  it('14.3 appelle POST /auth/logout sans payload', async () => {
+  it('14.3 calls POST /auth/logout with no payload', async () => {
     /* Arrange */
     mockPost.mockResolvedValueOnce({ data: { status: 'success', data: null } });
 

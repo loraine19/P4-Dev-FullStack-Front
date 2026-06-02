@@ -13,7 +13,7 @@ beforeEach(() => {
 describe('WelcomePage', () => {
 
   /* WP.1.1 no auth param → shows UploadCall (not auth forms) */
-  it('13.1.1 no auth query param → does not show Connexion or Créer un compte form', () => {
+  it('13.1.1 no auth query → hides login and register forms', () => {
     /* Act */
     render(
       <MemoryRouter initialEntries={['/']}>
@@ -27,7 +27,7 @@ describe('WelcomePage', () => {
   });
 
   /* WP.1.2 auth=login → shows LoginForm */
-  it('13.1.2 auth=login → shows Connexion form', () => {
+  it('13.1.2 auth=login → shows login form', () => {
     /* Act */
     render(
       <MemoryRouter initialEntries={['/?auth=login']}>
@@ -40,7 +40,7 @@ describe('WelcomePage', () => {
   });
 
   /* WP.1.3 auth=register → shows RegisterForm */
-  it('13.1.3 auth=register → shows Créer un compte form', () => {
+  it('13.1.3 auth=register → shows register form', () => {
     /* Act */
     render(
       <MemoryRouter initialEntries={['/?auth=register']}>
@@ -53,7 +53,7 @@ describe('WelcomePage', () => {
   });
 
   /* WP.1.4 click switch from login → shows register form */
-  it('13.1.4 clicking Créer un compte from login view → switches to register form', () => {
+  it('13.1.4 Create account link from login → register form', () => {
     /* Act */
     render(
       <MemoryRouter initialEntries={['/?auth=login']}>

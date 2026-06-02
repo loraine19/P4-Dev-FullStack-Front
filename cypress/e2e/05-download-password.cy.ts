@@ -1,37 +1,37 @@
-/* PARCOURS 5 -  Téléchargement avec mot de passe */
+/* FLOW 5 - Password-protected download */
 
-const TS = Date.now();
-const USER = {
+const TS5 = Date.now();
+const USERT5 = {
   name: 'Cypress DlPwd',
-  email: `cypress-dlpwd-${TS}@test.local`,
+  email: `cypress-dlpwd-${TS5}@test.local`,
   password: 'Password1!',
 };
-const FILENAME = `download-pwd-${TS}.txt`;
+const FILENAME5 = `download-pwd-${TS5}.txt`;
 const FILE_PASSWORD = 'Secret1234!';
 
-describe('Parcours 5 -  Download fichier protégé par mot de passe', () => {
+describe('Flow 5 - Password-protected download', () => {
   let shareToken: string;
 
   before(() => {
-    cy.registerViaApi(USER.name, USER.email, USER.password);
-    cy.task<string>('loginForTask', { email: USER.email, password: USER.password })
+    cy.registerViaApi(USERT5.name, USERT5.email, USERT5.password);
+    cy.task<string>('loginForTask', { email: USERT5.email, password: USERT5.password })
       .then((token) =>
         cy.task<{ shareToken: string }>('uploadTestFile', {
           token,
-          filename: FILENAME,
+          filename: FILENAME5,
           downloadPassword: FILE_PASSWORD,
         }),
       )
       .then((file) => { shareToken = file.shareToken; });
   });
 
-  it('5.1 Page download → champ mot de passe visible (fichier protégé)', () => {
+  it('5.1 Download page → password field visible (protected file)', () => {
     cy.visit(`/download/${shareToken}`);
-    cy.contains(FILENAME).should('be.visible');
+    cy.contains(FILENAME5).should('be.visible');
     cy.get('#download-password').should('be.visible');
   });
 
-  it('5.2 Mauvais mot de passe → message erreur', () => {
+  it('5.2 Wrong password → error message', () => {
     cy.visit(`/download/${shareToken}`);
 
     cy.intercept('POST', `**/download/${shareToken}`).as('download');
@@ -43,7 +43,7 @@ describe('Parcours 5 -  Download fichier protégé par mot de passe', () => {
     cy.get('[class*="callout"]').should('exist');
   });
 
-  it('5.3 Bon mot de passe → requête POST 200 + téléchargement déclenché', () => {
+  it('5.3 Correct password → POST 200 + download triggered', () => {
     cy.visit(`/download/${shareToken}`);
 
     cy.intercept('POST', `**/download/${shareToken}`).as('download');

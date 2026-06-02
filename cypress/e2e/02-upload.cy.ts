@@ -1,35 +1,35 @@
-/* PARCOURS 2 -  Upload fichier → lien de partage */
+/* FLOW 2 - Upload file and share link */
 
-const TS = Date.now();
-const USER = {
+const TS2 = Date.now();
+const USERT2 = {
   name: 'Cypress Upload',
-  email: `cypress-upload-${TS}@test.local`,
+  email: `cypress-upload-${TS2}@test.local`,
   password: 'Password1!',
 };
 
-describe('Parcours 2 -  Upload fichier', () => {
+describe('Flow 2 - Upload file', () => {
   before(() => {
-    // create user via API (clean setup)
-    cy.registerViaApi(USER.name, USER.email, USER.password);
+    // create userT2 via API (clean setup)
+    cy.registerViaApi(USERT2.name, USERT2.email, USERT2.password);
   });
 
   beforeEach(() => {
     // login via API -  Cypress preserves Set-Cookie for cy.visit
-    cy.loginViaApi(USER.email, USER.password);
+    cy.loginViaApi(USERT2.email, USERT2.password);
   });
 
-  it('2.1 Upload form visible à /upload', () => {
+  it('2.1 Upload form visible at /upload', () => {
     cy.visit('/upload');
     cy.get('#upload-file').should('exist');
     cy.contains('button', 'Générer un lien de partage').should('exist');
   });
 
-  it('2.2 Upload un fichier texte → redirigé vers /my-space + fichier dans la liste', () => {
+  it('2.2 Text file upload → redirect /my-space + file in list', () => {
     cy.visit('/upload');
 
     cy.get('#upload-file').selectFile({
       contents: Cypress.Buffer.from('contenu test cypress'),
-      fileName: `cypress-test-${TS}.txt`,
+      fileName: `cypress-test-${TS2}.txt`,
       mimeType: 'text/plain',
     });
 
@@ -37,10 +37,10 @@ describe('Parcours 2 -  Upload fichier', () => {
 
     // après upload → navigate('/my-space')
     cy.url().should('include', '/my-space');
-    cy.contains(`cypress-test-${TS}.txt`).should('be.visible');
+    cy.contains(`cypress-test-${TS2}.txt`).should('be.visible');
   });
 
-  it('2.3 Upload extension interdite (.exe) → erreur 400 + reste sur /upload', () => {
+  it('2.3 Forbidden .exe upload → 400 error, stays on /upload', () => {
     cy.visit('/upload');
 
     cy.get('#upload-file').selectFile({
@@ -55,14 +55,14 @@ describe('Parcours 2 -  Upload fichier', () => {
     cy.get('[class*="callout"]').should('exist');
   });
 
-  it('4.3 Upload avec mot de passe de téléchargement → icône cadenas sur la fiche', () => {
+  it('4.3 Upload with download password → lock icon on card', () => {
     /* Arrange */
     cy.visit('/upload');
 
     /* Act */
     cy.get('#upload-file').selectFile({
       contents: Cypress.Buffer.from('protected file content'),
-      fileName: `protected-${TS}.txt`,
+      fileName: `protected-${TS2}.txt`,
       mimeType: 'text/plain',
     });
     cy.get('#upload-password').type('Secret1234!');
@@ -73,9 +73,9 @@ describe('Parcours 2 -  Upload fichier', () => {
     cy.get('[aria-label="Fichier protégé"]').should('exist');
   });
 
-  it('4.4 Upload avec tag sélectionné → tag affiché sur la fiche dans MySpace', () => {
+  it('4.4 Upload with selected tag → tag on MySpace card', () => {
     /* Arrange */
-    const tagName = `tag-up-${TS}`;
+    const tagName = `tag-up-${TS2}`;
     cy.visit('/upload');
 
     /* Act -  create tag and attach file */
@@ -85,7 +85,7 @@ describe('Parcours 2 -  Upload fichier', () => {
 
     cy.get('#upload-file').selectFile({
       contents: Cypress.Buffer.from('tagged file content'),
-      fileName: `tagged-${TS}.txt`,
+      fileName: `tagged-${TS2}.txt`,
       mimeType: 'text/plain',
     });
     cy.contains('button', 'Générer un lien de partage').click();

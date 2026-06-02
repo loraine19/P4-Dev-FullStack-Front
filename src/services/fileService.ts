@@ -1,20 +1,19 @@
 import { fileApi } from '../api/fileApi';
-import type { FileItem } from '../types/file.types';
+import type { FileItemDto, UploadParams } from '../types/file.types';
 import type { ErrorMsg } from '../types/error.types';
 import { catchApiError } from './serviceHelpers';
 
 /* IFILE SERVICE INTERFACE */
 interface IFileService {
-  getMyFiles(): Promise<FileItem[] | ErrorMsg>;
-  uploadFile(formData: FormData): Promise<FileItem | ErrorMsg | null>;
-  uploadFileAnonymous(formData: FormData): Promise<FileItem | ErrorMsg | null>;
-  deleteFile(id: number): Promise<void>;
+  getMyFiles(): Promise<FileItemDto[] | ErrorMsg>;
+  upload(params: UploadParams, isAuthenticated: boolean): Promise<FileItemDto | ErrorMsg | null>;
+  deleteFile(id: number): Promise<void | ErrorMsg>;
 }
 
 /* FILE SERVICE */
 class FileService implements IFileService {
   /* GET MY FILES */
-  async getMyFiles(): Promise<FileItem[] | ErrorMsg> {
+  async getMyFiles(): Promise<FileItemDto[] | ErrorMsg> {
     try {
       const res = await fileApi.getAll();
       return res.data.data ?? [];
@@ -23,20 +22,23 @@ class FileService implements IFileService {
     }
   }
 
-  /* UPLOAD FILE */
-  async uploadFile(formData: FormData): Promise<FileItem | ErrorMsg | null> {
-    try {
-      const res = await fileApi.upload(formData);
-      return res.data.data;
-    } catch (error) {
-      return catchApiError(error);
-    }
+  /* BUILD FORM DATA */
+  private buildFormData({ file, expirationDays, password, tagIds }: UploadParams): FormData {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('expirationDays', String(expirationDays));
+    if (password) formData.append('downloadPassword', password);
+    tagIds?.forEach((id) => formData.append('tags', String(id)));
+    return formData;
   }
 
-  /* UPLOAD FILE ANONYMOUS */
-  async uploadFileAnonymous(formData: FormData): Promise<FileItem | ErrorMsg | null> {
+  /* UPLOAD */
+  async upload(params: UploadParams, isAuthenticated: boolean): Promise<FileItemDto | ErrorMsg | null> {
     try {
-      const res = await fileApi.uploadAnonymous(formData);
+      const formData = this.buildFormData(params);
+      const res = isAuthenticated
+        ? await fileApi.upload(formData)
+        : await fileApi.uploadAnonymous(formData);
       return res.data.data;
     } catch (error) {
       return catchApiError(error);
@@ -44,8 +46,12 @@ class FileService implements IFileService {
   }
 
   /* DELETE FILE */
-  async deleteFile(id: number): Promise<void> {
-    await fileApi.remove(id);
+  async deleteFile(id: number): Promise<void | ErrorMsg> {
+    try {
+      await fileApi.remove(id);
+    } catch (error) {
+      return catchApiError(error);
+    }
   }
 }
 

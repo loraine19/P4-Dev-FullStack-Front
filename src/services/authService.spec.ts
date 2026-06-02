@@ -14,6 +14,7 @@ vi.mock('../infrastructure/tokenStorage', () => ({
 
 import { authApi } from '../api/authApi';
 import { authService } from './authService';
+import type { RegisterPayload } from '../types/user.types';
 
 /* Helpers */
 const mockLogin = authApi.login as ReturnType<typeof vi.fn>;
@@ -28,7 +29,7 @@ beforeEach(() => vi.clearAllMocks());
 
 /* ----------------------------------------------------------------- login() */
 describe('authService.login()', () => {
-  it('S.1 réponse ok → retourne l\'utilisateur', async () => {
+  it('S.1 ok response → returns user', async () => {
     /* Arrange */
     const user = { id: 1, email: 'alice@test.com', username: 'alice' };
     mockLogin.mockResolvedValueOnce(makeApiOk({ user, access_token: null }));
@@ -40,7 +41,7 @@ describe('authService.login()', () => {
     expect(result).toEqual(user);
   });
 
-  it('S.2 erreur réseau 401 → retourne ErrorMsg', async () => {
+  it('S.2 network 401 → returns ErrorMsg', async () => {
     /* Arrange */
     mockLogin.mockRejectedValueOnce({ response: { status: 401 } });
 
@@ -51,7 +52,7 @@ describe('authService.login()', () => {
     expect(result).toMatchObject({ message: expect.any(String), level: 'error' });
   });
 
-  it('S.3 erreur réseau sans status → message générique', async () => {
+  it('S.3 network error no status → generic message', async () => {
     /* Arrange */
     mockLogin.mockRejectedValueOnce(new Error('Network error'));
 
@@ -65,23 +66,25 @@ describe('authService.login()', () => {
 
 /* ----------------------------------------------------------------- register() */
 describe('authService.register()', () => {
-  it('S.4 réponse ok → retourne { success: true }', async () => {
+  it('S.4 ok response → returns { success: true }', async () => {
     /* Arrange */
     mockRegister.mockResolvedValueOnce(makeApiOk(null));
 
     /* Act */
-    const result = await authService.register({ email: 'new@test.com', password: 'password', username: 'new' });
+    const payload : RegisterPayload = { email: 'new@test.com', password: 'password', name: 'new' } ;
+    const result = await authService.register(payload);
 
     /* Assert */
     expect(result).toEqual({ success: true });
   });
 
-  it('S.5 erreur 400 → ErrorMsg', async () => {
+  it('S.5 400 error → ErrorMsg', async () => {
     /* Arrange */
     mockRegister.mockRejectedValueOnce({ response: { status: 400 } });
 
     /* Act */
-    const result = await authService.register({ email: '', password: '', username: '' });
+    const payload : RegisterPayload = { email: '', password: '', name: '' } ;
+    const result = await authService.register(payload);
 
     /* Assert */
     expect(result).toMatchObject({ level: 'error' });
@@ -90,7 +93,7 @@ describe('authService.register()', () => {
 
 /* ----------------------------------------------------------------- logout() */
 describe('authService.logout()', () => {
-  it('S.6 appelle authApi.logout et tokenStorage.remove', async () => {
+  it('S.6 calls authApi.logout and tokenStorage.remove', async () => {
     /* Arrange */
     mockLogout.mockResolvedValueOnce(makeApiOk(null));
 

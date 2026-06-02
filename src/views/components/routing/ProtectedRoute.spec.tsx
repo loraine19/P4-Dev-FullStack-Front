@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import useAuthStore from '../../../stores/authStore';
 
-const RESET = { user: null, isAuthenticated: false, isLoading: false, error: null };
+const RESET = { user: null, isAuthenticated: false, isInitialized: true, isLoading: false, error: null };
 
 beforeEach(() => {
   useAuthStore.setState(RESET);
@@ -15,7 +15,7 @@ describe('ProtectedRoute', () => {
   /* PR.1.1 authenticated → renders children */
   it('10.1.1 authenticated → renders children', () => {
     /* Arrange */
-    useAuthStore.setState({ isAuthenticated: true });
+    useAuthStore.setState({ isAuthenticated: true, isInitialized: true });
 
     /* Act */
     render(

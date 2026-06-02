@@ -19,7 +19,10 @@ const Callout = ({ variant = 'info', message, error }: ICalloutProps) => {
   const icon = displayVariant === 'success' ? '✓' : displayVariant === 'error' ? '⚠' : displayVariant === 'warning' ? '!' : 'ℹ';
 
   return (
-    <p className={`callout callout-${displayVariant}`}>
+    <p
+      className={`callout callout-${displayVariant}`}
+      role={displayVariant === 'error' || displayVariant === 'warning' ? 'alert' : undefined}
+    >
       <span className="callout-icon">{icon}</span>
       {displayMessage}
     </p>

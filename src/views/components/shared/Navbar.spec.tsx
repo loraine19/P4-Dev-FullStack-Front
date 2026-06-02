@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import Navbar from './Navbar';
 
 describe('Navbar', () => {
-  it('19.1 affiche le logo DataShare', () => {
+  it('19.1 renders DataShare logo', () => {
     /* Arrange / Act */
     render(<MemoryRouter><Navbar /></MemoryRouter>);
 
@@ -12,7 +12,7 @@ describe('Navbar', () => {
     expect(screen.getByText('DataShare')).toBeInTheDocument();
   });
 
-  it('19.2 affiche le lien CTA par défaut (Se connecter)', () => {
+  it('19.2 renders default CTA link (Sign in)', () => {
     /* Arrange / Act */
     render(<MemoryRouter><Navbar /></MemoryRouter>);
 
@@ -20,7 +20,7 @@ describe('Navbar', () => {
     expect(screen.getByText('Se connecter')).toBeInTheDocument();
   });
 
-  it('19.3 affiche un label CTA personnalisé', () => {
+  it('19.3 renders custom CTA label', () => {
     /* Arrange / Act */
     render(<MemoryRouter><Navbar ctaLabel="Mon espace" ctaPath="/my-space" /></MemoryRouter>);
 

@@ -7,19 +7,19 @@ import SwitchText from '../shared/SwitchText';
 
 
 /* REGISTER FORM PROPS */
-interface IRegisterFormProps {
+interface RegisterFormProps {
   onSwitch: () => void;
 }
 
 /* REGISTER FORM */
-const RegisterForm = ({ onSwitch }: IRegisterFormProps) => {
+const RegisterForm = ({ onSwitch }: RegisterFormProps) => {
   const { error, isLoading, register } = useAuthStore(
     useShallow((s) => ({ error: s.error, isLoading: s.isLoading, register: s.register })),
   );
 
   /* HANDLE SUBMIT */
-  const handleSubmit = async (values: FieldValues<TRegisterField>) => {
-    const success = await register({ name: values.name, email: values.email, password: values.password });
+  const handleSubmit = async ({ passwordConfirm: _confirm, ...payload }: FieldValues<TRegisterField>) => {
+    const success = await register(payload);
     if (success) onSwitch();
   };
 

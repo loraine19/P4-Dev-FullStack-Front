@@ -1,13 +1,17 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useShallow } from 'zustand/react/shallow';
 import Sidebar from '../components/shared/Sidebar';
 import Switch from '../components/shared/Switch';
 import Button from '../components/shared/Button';
 import FileCard from '../components/myspace/FileCard';
+import Callout from '../components/shared/Callout';
 import useAuthStore from '../../stores/authStore';
 import useFileStore from '../../stores/fileStore';
-import { fileService } from '../../services/fileService';
-import type { FileItem } from '../../types/file.types';
+import useTagStore from '../../stores/tagStore';
+import { FileItem } from '../../entities/FileItem';
+import type { FileItemDto } from '../../types/file.types';
+import ContextMenu from '../components/shared/ContextMenu';
 
 /* FILTER CONSTANTS */
 const FILTER_TYPE = {
@@ -20,17 +24,26 @@ const FILTER_TYPE = {
 const MySpacePage = () => {
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
-  const { files, setFiles, removeFile } = useFileStore();
+  const { files, loadFiles, deleteFile, error , isLoading} = useFileStore(
+    useShallow(({ files, loadFiles, deleteFile, error , isLoading}) => ({ files, loadFiles, deleteFile, error , isLoading})),
+  );
+  const { removeTag , errorTags  } = useTagStore(
+    useShallow(({ removeTag , errorTags }) => ({ removeTag , errorTags })),
+  );
   const [activeFilter, setActiveFilter] = useState<typeof FILTER_TYPE[keyof typeof FILTER_TYPE]>(FILTER_TYPE.ALL);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-
+  const[availableTags, setAvailableTags] = useState<{ id: number; name: string }[]>([]);
+  
   /* LOAD FILES */
   useEffect(() => {
-    fileService.getMyFiles().then((result) => {
-      if (Array.isArray(result)) setFiles(result);
-    });
-  }, [setFiles]);
+    void loadFiles();
+  }, [loadFiles]);
+
+  /* INITIALIZE AVAILABLE TAGS */
+  useEffect(() => {
+    setAvailableTags([...new Set(files.flatMap((f) => f.tags))]);
+  }, [files]);
 
   /* FILTER TABS */
   const filterTabs = [
@@ -39,42 +52,23 @@ const MySpacePage = () => {
     { id: FILTER_TYPE.EXPIRED, label: 'Expiré' },
   ];
 
-  /* GET FILTERED FILES */
-  const availableTags = useMemo(() => {
-    const map = new Map<number, string>();
-    files.forEach((f) => f.tags.forEach((t) => map.set(t.id, t.name)));
-    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [files]);
-
+/* FILTERED FILES */
   const filteredFiles = useMemo(() => {
     let result = files;
-    if (activeFilter === FILTER_TYPE.ACTIVE) result = result.filter((f) => new Date(f.expiresAt) > new Date());
-    if (activeFilter === FILTER_TYPE.EXPIRED) result = result.filter((f) => new Date(f.expiresAt) <= new Date());
+    if (activeFilter === FILTER_TYPE.ACTIVE) result = result.filter((f) => !new FileItem(f).isExpired());
+    if (activeFilter === FILTER_TYPE.EXPIRED) result = result.filter((f) => new FileItem(f).isExpired());
     if (selectedTagIds.length > 0) result = result.filter((f) => f.tags.some((t) => selectedTagIds.includes(t.id)));
     return result;
-  }, [files, activeFilter, selectedTagIds]);
-
-  /* FORMAT EXPIRY TEXT */
-  const getExpiryText = (expiresAt: string): string => {
-    const now = new Date();
-    const diffMs = new Date(expiresAt).getTime() - now.getTime();
-    const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
-
-    if (diffDays < 0) return 'Expiré';
-    if (diffDays === 0) return 'Expire aujourd\'hui';
-    if (diffDays === 1) return 'Expire demain';
-    return `Expire dans ${diffDays} jours`;
-  };
-
-  /* HANDLE DELETE */
-  const handleDeleteFile = async (fileId: number) => {
-    await fileService.deleteFile(fileId);
-    removeFile(fileId);
-  };
+  }, [files, activeFilter, selectedTagIds ]);
 
   /* HANDLE DOWNLOAD */
-  const handleDownloadFile = (file: FileItem) => {
+  const handleDownloadFile = (file: FileItemDto) => {
     navigate(`/download/${file.shareToken}`);
+  };
+
+  /* HANDLE COPY LINK */
+  const handleCopyLink = (shareToken: string) => {
+    void navigator.clipboard.writeText(`${window.location.origin}/download/${shareToken}`);
   };
 
   /* HANDLE ADD FILES */
@@ -86,8 +80,13 @@ const MySpacePage = () => {
   /* HANDLE LOGOUT */
   const handleLogout = async () => {
     setIsSideMenuOpen(false);
-    await logout();
-    navigate('/');
+    const isLoggedOut = await logout();
+    if (isLoggedOut) {
+      navigate('/');
+    }
+    else {
+      alert(error);
+    }
   };
 
   /* OPEN SIDE MENU */
@@ -112,6 +111,14 @@ const MySpacePage = () => {
     );
   };
 
+  /* CONTEXT MENU ITEMS */
+  const menuItems = (tagId: number) => [
+    { label: 'Supprimer', action: async () => {
+      await removeTag(tagId);
+      await loadFiles();
+    } },
+  ];
+
   return (
     <main className="clear-page my-space-page">
       <header className="my-space-topbar">
@@ -126,6 +133,7 @@ const MySpacePage = () => {
             Ajouter des fichiers
           </Button>
           <Button
+          id="logout-button"
             variant="text"
             onClick={handleLogout}>
             Déconnexion
@@ -145,40 +153,59 @@ const MySpacePage = () => {
 
         {/* CONTENT */}
         <div className="my-space-content">
-          <h1 className="page-heading">Mes fichiers</h1>
+            <h1 className="page-heading">
+              Mes fichiers
+            </h1>
 
           {/* FILTER SWITCH */}
-          <Switch activeTab={activeFilter} tabs={filterTabs} onTabChange={handleTabChange} />
+            <Switch
+              activeTab={activeFilter}
+              tabs={filterTabs}
+              onTabChange={handleTabChange} />
 
           {/* TAG FILTER */}
-          {availableTags.length > 0 && (
+            {availableTags && (
+           
             <div className="chip-row">
-              {availableTags.map((tag) => (
-                <button
-                  key={tag.id}
-                  type="button"
-                  className={`chip chip-action${selectedTagIds.includes(tag.id) ? ' chip-active' : ''}`}
-                  onClick={() => handleToggleTag(tag.id)}
-                >
-                  {tag.name}
-                </button>
-              ))}
+                {availableTags.map((tag) => {
+                 const isActive = selectedTagIds.includes(tag.id);
+                 return (
+                  <div
+                    key={tag.id} className={`chip chip-action${isActive ? ' chip-active' : ''}`}  >
+                     <button type="button"
+                       onClick={() => handleToggleTag(tag.id)}>
+                      <p className="chip-name">{tag.name}</p>
+                       {isActive && <span className="chip-action-close">×</span>}
+                     </button>
+                     {!isActive &&
+                         <ContextMenu items={menuItems(tag.id)} /> }
+                  </div>
+                );
+              })}
             </div>
           )}
 
           {/* FILE LIST */}
-          <div className="file-list">
+            {(error || errorTags) && <Callout error={error ?? errorTags ?? undefined} />}
+          <div className={`file-list ${isLoading ? 'hidden' : ''}`}>
             {filteredFiles.length > 0 ? (
-              filteredFiles.map((file) => (
-                <FileCard
-                  key={file.id}
-                  file={file}
-                  expiryText={getExpiryText(file.expiresAt)}
-                  onDelete={handleDeleteFile}
-                  onDownload={handleDownloadFile}
-                />
-              ))
-            ) : (
+              filteredFiles.map((file) => {
+                const entity = new FileItem(file);
+                return (
+                  <FileCard
+                    key={file.id}
+                    file={file}
+                    isExpired={entity.isExpired()}
+                    expiryText={entity.formatExpiry()}
+                    onDelete={deleteFile}
+                    onDownload={handleDownloadFile}
+                    onCopyLink={handleCopyLink}
+                  />
+                );
+              }
+              )
+              )
+             : (
               <p className="files-empty">Aucun fichier</p>
             )}
           </div>

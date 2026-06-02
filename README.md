@@ -47,8 +47,23 @@ src/
 │   ├── authStore.ts      ← user, isAuthenticated
 │   ├── fileStore.ts      ← files[]
 │   └── tagStore.ts       ← tags[]
+├── constants/
+│   ├── api.types.ts          ← ApiResponseEnvelope<T>
+│   ├── error-messages.ts     ← ERROR_MESSAGES (zéro string hardcodée)
+│   ├── formConfigs.ts        ← LOGIN_INPUTS · REGISTER_INPUTS (rules intégrées)
+│   ├── upload.ts             ← MAX_FILE_SIZE · FILE_PASSWORD_MIN_LENGTH
+│   └── validationRules.ts    ← RULES factory · PASSWORD_MIN_LENGTH
+├── types/
+│   ├── api.types.ts          ← ApiResponseEnvelope<T>
+│   ├── download.types.ts     ← DownloadMeta
+│   ├── error.types.ts        ← ErrorMsg · isErrorMsg()
+│   ├── file.types.ts         ← FileItemDto · UploadParams · UploadingFile
+│   ├── tag.types.ts          ← Tag
+│   └── user.types.ts         ← UserPublic · LoginPayload · RegisterPayload · AuthResponse
+├── entities/
+│   └── FileItem.ts           ← isExpired() · displaySize() · formatExpiry()
 ├── utils/
-│   └── fieldValidation.ts← FieldValidator<T> classe stateless
+│   └── fieldValidation.ts    ← validate() · validateAll()
 └── views/
     ├── pages/
     │   ├── WelcomePage.tsx    ← Login / Register (switch)
