@@ -1,4 +1,4 @@
-# CHANGELOG 6 — Audit types & tagStore câblage
+# CHANGELOG6 - feat/api (audit types + tagStore) - front
 
 ## Refactoring — `FileItem` → `FileItemDto` (types/file.types.ts)
 

@@ -1,4 +1,4 @@
-# CHANGELOG 8 — Test labels EN + doc counts
+# CHANGELOG8 - feat/api (test labels EN + doc counts) - front
 
 ## Tests
 

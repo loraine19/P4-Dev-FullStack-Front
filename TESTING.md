@@ -1,49 +1,21 @@
-- # **TESTING.md \-**
+# TESTING.md
 
-## **DataShare Frontend**
+## DataShare Frontend
 
 ---
 
-[1\. Stratégie de tests](#1.-stratégie-de-tests)
-
-[2\. Tests unitaires - Vitest](#2.-tests-unitaires-- -vitest)
-
-[a. 41 fichiers - 203/203 ✅](#41-fichiers-- -203/203-✅)
-
-[b. Commandes](#commandes)
-
-[3\. Tests E2E - Cypress](#3.-tests-e2e-- -cypress)
-
-[a. 7 fichiers - 26/26 ✅](#7-fichiers-- -26/26-✅)
-
-[b. Stratégie technique](#stratégie-technique)
-
-[c. Commandes](#commandes-1)
-
-[4\. Couverture unitaire - v8](#4.-couverture-unitaire-- -v8)
-
-[5\. Rapports](#5.-rapports)
-
-[6\. Critères d'acceptation](#6.-critères-d'acceptation)
-
-[7\. Détail des cas de test](#7.-détail-des-cas-de-test)
-
-[a. 📊 Plan détaillé complet](#📊-plan-détaillé-complet)
-
-#
-
-# 1\. Stratégie de tests {#1.-stratégie-de-tests}
+# 1. Stratégie de tests
 
 | Niveau         | Outil                 | Périmètre                                       | Commande         |
 | :------------- | :-------------------- | :---------------------------------------------- | :--------------- |
-| Unitaire       | Vitest 4.1.7 \+ jsdom | Stores, API clients, composants, pages, routing | `npm test`       |
+| Unitaire       | Vitest 4.1.7 + jsdom | Stores, API clients, composants, pages, routing | `npm test`       |
 | E2E navigateur | Cypress 15            | Front React → API NestJS → PostgreSQL           | `npm run cy:run` |
 
 ---
 
-# 2\. Tests unitaires - Vitest {#2.-tests-unitaires-- -vitest}
+# 2. Tests unitaires - Vitest
 
-1. ## 41 fichiers - 203/203 ✅ {#41-fichiers-- -203/203-✅}
+## 1. 41 fichiers - 203/203 ✅
 
 | N° TEST_PLAN | Suite                     | Fichier                                      | Domaine        |
 | :----------: | :------------------------ | :------------------------------------------- | :------------- |
@@ -83,18 +55,16 @@
 |      33      | ConfigPage                | `routing/ConfigPage.spec.tsx`                | Routing        |
 |      -       | Services (hors TEST_PLAN) | `services/*.spec.ts` · `download/` · `tags/` | Services       |
 
-2. ## Commandes {#commandes}
+## 2. Commandes
 
 - npm test \# run all unit tests (vitest run)
 - npm run test:cov \# avec couverture v8 (coverage-unit/)
 
 ---
 
-#
+# 3. Tests E2E - Cypress
 
-# 3\. Tests E2E - Cypress {#3.-tests-e2e-- -cypress}
-
-1. ## 7 fichiers - 26/26 ✅ {#7-fichiers-- -26/26-✅}
+## 1. 7 fichiers - 26/26 ✅
 
 | Fichier                      | Flow (describe)                                    | Tests  |
 | :--------------------------- | :------------------------------------------------- | :----: |
@@ -107,18 +77,18 @@
 | `07-tags.cy.ts`              | Flow 7 - Tags (create, attach, remove)             |   4    |
 | **Total**                    |                                                                | **26** |
 
-2. ## Stratégie technique {#stratégie-technique}
+## 2. Stratégie technique
 
 - **Setup programmatique** : `cy.registerViaApi`, `cy.loginViaApi` via `cy.request()` - le cookie httpOnly est préservé automatiquement par Cypress pour les `cy.visit` suivants
 - **Setup fichiers** : `cy.task('uploadTestFile')` - upload multipart depuis Node.js avec Bearer token (`isMobile: true`) pour éviter le cookie httpOnly dans le contexte Node
-- **Vérification download** : `cy.intercept()` \+ `cy.wait('@download').its('response.statusCode')` - Cypress capture la réponse binaire sans vérifier le fichier physique
+- **Vérification download** : `cy.intercept()` + `cy.wait('@download').its('response.statusCode')` - Cypress capture la réponse binaire sans vérifier le fichier physique
 - **Isolation** : email unique `email-\${Date.now()}@test.local` par spec - pas de dépendance entre fichiers
 
-3. ## Commandes {#commandes-1}
+## 3. Commandes
 
-\# prérequis : back \+ front démarrés
+\# prérequis : back + front démarrés
 
-- docker compose up \-d \# PostgreSQL (côté back)
+- docker compose up -d \# PostgreSQL (côté back)
 - npm run start:dev \# NestJS back (port 3000\)
 - npm run dev \# Vite front (port 5173\)
 - npm run cy:open \# mode interactif (navigateur)
@@ -126,20 +96,20 @@
 
 ---
 
-# 4\. Couverture unitaire - v8 {#4.-couverture-unitaire-- -v8}
+# 4. Couverture unitaire - v8
 
 | Métrique   | Seuil | Résultat  |
 | :--------- | :---: | :-------: |
 | Statements | ≥ 70% | ✅ 74.73% |
 | Lines      | ≥ 70% | ✅ 77.64% |
-| Functions  | ≥ 70% | ✅ \~80%  |
-| Branches   | ≥ 70% |   \~68%   |
+| Functions  | ≥ 70% | ✅ ~80%  |
+| Branches   | ≥ 70% |   ~68%   |
 
 Rapport HTML : `coverage-unit/lcov-report/index.html`
 
 ---
 
-# 5\. Rapports {#5.-rapports}
+# 5. Rapports
 
 | Rapport                           | Chemin                                 | Généré par         |
 | :-------------------------------- | :------------------------------------- | :----------------- |
@@ -148,7 +118,7 @@ Rapport HTML : `coverage-unit/lcov-report/index.html`
 
 ---
 
-# 6\. Critères d'acceptation {#6.-critères-d'acceptation}
+# 6. Critères d'acceptation
 
 | Critère                |       Seuil        |  Résultat   |
 | :--------------------- | :----------------: | :---------: |
@@ -160,6 +130,6 @@ Rapport HTML : `coverage-unit/lcov-report/index.html`
 
 ---
 
-# 7\. Détail des cas de test {#7.-détail-des-cas-de-test}
+# 7. Détail des cas de test
 
-1. ## [📊 Plan détaillé complet](https://docs.google.com/spreadsheets/d/e/2PACX-1vQKMx-Go8curn85rzLBfdVDXZYMuyo_8tVePBiEKMCvAa8R0qwPmmR5kwxnHjEF-A0RURbUuNiYcimJ/pubhtml?gid=906604324&single=true) {#📊-plan-détaillé-complet}
+## 1. [📊 Plan détaillé complet](https://docs.google.com/spreadsheets/d/e/2PACX-1vQKMx-Go8curn85rzLBfdVDXZYMuyo_8tVePBiEKMCvAa8R0qwPmmR5kwxnHjEF-A0RURbUuNiYcimJ/pubhtml?gid=906604324&single=true)

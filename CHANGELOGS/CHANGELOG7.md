@@ -1,4 +1,4 @@
-# CHANGELOG 7 — Session hybride : verifySession + downloadStore + Callout a11y
+# CHANGELOG7 - feat/api (session hybride + downloadStore) - front
 
 ## Feature — Vérification de session au boot (`authStore`)
 

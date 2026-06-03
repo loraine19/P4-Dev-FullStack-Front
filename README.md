@@ -124,6 +124,10 @@ cp .env.example .env
 ```env
 VITE_API_URL=http://localhost:3000/api/v1
 NODE_ENV=development
+
+# Mode upload anonyme (optionnel — mettre à false en production)
+# Si true, la route /upload est accessible sans authentification
+VITE_ANONYMOUS_UPLOAD=false
 ```
 
 ## Lancement
