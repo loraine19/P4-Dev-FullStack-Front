@@ -30,11 +30,12 @@ L'authentification est gérée via **cookie httpOnly** (mode web - posé par le 
 ```
 src/
 ├── api/
-│   ├── apiClient.ts      ← Axios (baseURL, withCredentials, interceptor 401)
-│   ├── authApi.ts        ← login / register / logout
-│   ├── fileApi.ts        ← getAll / upload / remove
-│   ├── downloadApi.ts    ← getMeta / download
-│   └── tagApi.ts         ← getAll / create / remove
+│   ├── apiClient.ts        ← Axios (baseURL, withCredentials, interceptor 401)
+│   ├── authApi.ts          ← login / register / logout
+│   ├── fileApi.ts          ← getAll / upload / remove
+│   ├── downloadApi.ts      ← getMeta / download
+│   ├── tagApi.ts           ← getAll / create / remove
+│   └── publicApiPaths.ts   ← routes publiques (sans token)
 ├── infrastructure/
 │   └── tokenStorage.ts   ← localStorage (mode mobile uniquement -  web = cookie httpOnly)
 ├── services/
@@ -46,9 +47,9 @@ src/
 ├── stores/
 │   ├── authStore.ts      ← user, isAuthenticated
 │   ├── fileStore.ts      ← files[]
-│   └── tagStore.ts       ← tags[]
+│   ├── tagStore.ts       ← tags[]
+│   └── downloadStore.ts  ← meta, isProtected
 ├── constants/
-│   ├── api.types.ts          ← ApiResponseEnvelope<T>
 │   ├── error-messages.ts     ← ERROR_MESSAGES (zéro string hardcodée)
 │   ├── formConfigs.ts        ← LOGIN_INPUTS · REGISTER_INPUTS (rules intégrées)
 │   ├── upload.ts             ← MAX_FILE_SIZE · FILE_PASSWORD_MIN_LENGTH
@@ -63,7 +64,8 @@ src/
 ├── entities/
 │   └── FileItem.ts           ← isExpired() · displaySize() · formatExpiry()
 ├── utils/
-│   └── fieldValidation.ts    ← validate() · validateAll()
+│   ├── fieldValidation.ts    ← validate() · validateAll()
+│   └── formatFileSize.ts     ← formatFileSize()
 └── views/
     ├── pages/
     │   ├── WelcomePage.tsx    ← Login / Register (switch)
@@ -72,8 +74,10 @@ src/
     │   └── DownloadPage.tsx   ← Téléchargement public via shareToken
     └── components/
         ├── shared/
-        │   ├── Navbar.tsx · ProtectedRoute.tsx · Button.tsx · Callout.tsx
+        │   ├── Navbar.tsx · Button.tsx · Callout.tsx · ContextMenu.tsx
         │   ├── Footer.tsx · Sidebar.tsx · PageHeader.tsx · TagComponent.tsx
+        │   ├── Icons.tsx · Switch.tsx · SwitchText.tsx
+        │   ├── UploadButton.tsx · UploadCall.tsx
         │   └── forms/ (Form.tsx · InputField.tsx · SelectField.tsx)
         ├── routing/
         │   ├── ProtectedRoute.tsx · UploadRoute.tsx · ConfigPage.tsx
@@ -83,7 +87,9 @@ src/
         ├── myspace/
         │   └── FileCard.tsx
         ├── upload/
-        │   └── UploadForm.tsx
+        │   ├── UploadForm.tsx
+        │   ├── FileSelectField.tsx
+        │   └── options.ts
         └── download/
             └── DownloadForm.tsx
 ```
