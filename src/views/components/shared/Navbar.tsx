@@ -13,11 +13,13 @@ const Navbar = ({ ctaLabel = 'Se connecter', ctaPath = '/' }: INavbarProps) => {
       <Link to="/" className="app-logo">
         <span className="app-brand">DataShare</span>
       </Link>
-      <Link
-        to={ctaPath}
-        className="btn btn-dark">
-        {ctaLabel}
-      </Link>
+      <nav>
+        <Link
+          to={ctaPath}
+          className="btn btn-dark">
+          {ctaLabel}
+        </Link>
+      </nav>
     </header>
   );
 };

@@ -1,6 +1,7 @@
 import { downloadApi } from '../api/downloadApi';
 import type { DownloadMeta } from '../types/download.types';
 import type { ErrorMsg } from '../types/error.types';
+import { ERROR_MESSAGES } from '../constants/error-messages';
 import { catchApiError } from './serviceHelpers';
 
 /* IDOWNLOAD SERVICE INTERFACE */
@@ -15,7 +16,11 @@ class DownloadService implements IDownloadService {
   async getMeta(shareToken: string): Promise<DownloadMeta | ErrorMsg> {
     try {
       const res = await downloadApi.getMeta(shareToken);
-      return res.data.data as DownloadMeta;
+      const meta = res.data.data;
+      if (!meta) {
+        return { level: 'error', message: res.data.message || ERROR_MESSAGES.HTTP.NOT_FOUND };
+      }
+      return meta;
     } catch (error) {
       return catchApiError(error);
     }

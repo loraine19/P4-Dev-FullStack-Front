@@ -1,36 +1,42 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useShallow } from 'zustand/react/shallow';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Button from '../shared/Button';
+import FileSelectField from './FileSelectField';
 import InputField from '../shared/forms/InputField';
 import SelectField from '../shared/forms/SelectField';
 import TagComponent from '../shared/TagComponent';
 import Callout from '../shared/Callout';
-import useFileStore from '../../../stores/fileStore';
-import useTagStore from '../../../stores/tagStore';
+import { useAuthStoreShallow } from '../../../stores/authStore';
+import useFileStore, { useFileStoreShallow } from '../../../stores/fileStore';
+import { useTagStoreShallow } from '../../../stores/tagStore';
 import { ERROR_MESSAGES } from '../../../constants/error-messages';
-import { FILE_PASSWORD_MIN_LENGTH } from '../../../constants/upload';
+import { FILE_PASSWORD_MIN_LENGTH, TAG_NAME_MAX_LENGTH, TAG_NAME_MIN_LENGTH } from '../../../constants/upload';
 import type { ErrorMsg } from '../../../types/error.types';
 import { EXPIRATION_OPTIONS } from './options';
 import type { Tag } from '../../../types/tag.types';
 
 /* UPLOAD FORM */
+type UploadLocationState = { preselectedFile?: File };
+
 const UploadForm = () => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   /* STORES */
-  const { upload, isLoading, error: fileError, shareToken, clearUploadingFile } = useFileStore(
-    useShallow((s) => ({
-      upload: s.upload,
-      isLoading: s.isLoading,
-      error: s.error,
-      shareToken: s.shareToken,
-      clearUploadingFile: s.clearUploadingFile,
-    })),
-  );
-  const { tags, addTagByName, errorTags, loadTags } = useTagStore(
-    useShallow((s) => ({ tags: s.tags, addTagByName: s.addTagByName, errorTags: s.errorTags, loadTags: s.loadTags })),
-  );
+  const { isAuthenticated } = useAuthStoreShallow((s) => ({ isAuthenticated: s.isAuthenticated }));
+  const { upload, isLoading, error: fileError, uploadingFile, clearUploadingFile } = useFileStoreShallow((s) => ({
+    upload: s.upload,
+    isLoading: s.isLoading,
+    error: s.error,
+    uploadingFile: s.uploadingFile,
+    clearUploadingFile: s.clearUploadingFile,
+  }));
+  const { tags, addTagByName, errorTags, loadTags } = useTagStoreShallow((s) => ({
+    tags: s.tags,
+    addTagByName: s.addTagByName,
+    errorTags: s.errorTags,
+    loadTags: s.loadTags,
+  }));
 
   /* FORM STATE */
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -42,21 +48,32 @@ const UploadForm = () => {
 
   /* LOAD TAGS */
   useEffect(() => {
+    if (!isAuthenticated) return;
     void loadTags();
-  }, [loadTags]);
+  }, [isAuthenticated, loadTags]);
 
   /* PENDING FILE FROM UPLOAD BUTTON */
   useEffect(() => {
-    const pending = useFileStore.getState().uploadingFile?.file ?? null;
+    const fromRoute = (location.state as UploadLocationState | null)?.preselectedFile;
+    const fromStore = uploadingFile?.file ?? null;
+    const pending = fromRoute ?? fromStore;
     if (!pending) return;
-    setSelectedFile(pending);
+    setSelectedFile((prev) => prev ?? pending);
     clearUploadingFile();
-  }, [clearUploadingFile]);
+    if (fromRoute) {
+      navigate(location.pathname, { replace: true, state: null });
+    }
+  }, [location.state, location.pathname, uploadingFile, clearUploadingFile, navigate]);
 
   /* HANDLE ADD TAG */
   const handleAddTag = async () => {
-    const newTag = await addTagByName(tagInput.trim());
-    if (newTag) {
+    const name = tagInput.trim();
+    if (name.length < TAG_NAME_MIN_LENGTH || name.length > TAG_NAME_MAX_LENGTH) {
+      setValidationError({ message: ERROR_MESSAGES.TAGS.INVALID_LENGTH, level: 'error' });
+      return;
+    }
+    const newTag = await addTagByName(name);
+    if (newTag && !selectedTags.some((t) => t.id === newTag.id)) {
       setSelectedTags([...selectedTags, newTag]);
       setTagInput('');
     }
@@ -76,7 +93,17 @@ const UploadForm = () => {
     }
     const tagIds = selectedTags.map((tag) => tag.id);
     const success = await upload({ file: selectedFile, expirationDays: Number(expirationDays), password, tagIds });
-    if (success && !useFileStore.getState().shareToken) navigate('/my-space');
+    if (!success) return;
+    const token = useFileStore.getState().shareToken;
+    if (token) {
+      navigate(`/download/${token}`);
+      return;
+    }
+    if (isAuthenticated) {
+      navigate('/my-space');
+      return;
+    }
+    setValidationError({ message: ERROR_MESSAGES.UPLOAD.NO_SHARE_TOKEN, level: 'error' });
   };
 
   const displayError = validationError ?? fileError ?? errorTags;
@@ -88,12 +115,14 @@ const UploadForm = () => {
       <form className="form-grid" onSubmit={handleSubmit}>
         {displayError && <Callout error={displayError} />}
 
-        <InputField
+        <FileSelectField
           id="upload-file"
           label="Fichier"
-          type="file"
-          inputClassName="form-file"
-          onChange={(e) => setSelectedFile((e.target as HTMLInputElement).files?.[0] ?? null)}
+          file={selectedFile}
+          onFileChange={(file) => {
+            setSelectedFile(file);
+            clearUploadingFile();
+          }}
         />
 
         <div className="grid-2">
@@ -118,29 +147,24 @@ const UploadForm = () => {
           />
         </div>
 
-        <TagComponent
-          id="upload-tags"
-          label="Tags"
-          value={tagInput}
-          selectedTags={selectedTags}
-          setSelectedTags={setSelectedTags}
-          onChange={setTagInput}
-          tags={tags}
-          onAdd={handleAddTag}
-          placeholder="design, client, facture"
-        />
+        {isAuthenticated ? (
+          <TagComponent
+            id="upload-tags"
+            label="Tags"
+            value={tagInput}
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+            onChange={setTagInput}
+            tags={tags}
+            onAdd={handleAddTag}
+            placeholder="design, client, facture"
+          />
+        ) : null}
 
         <Button type="submit" variant="primary" disabled={isLoading}>
           {isLoading ? 'Upload en cours…' : 'Générer un lien de partage'}
         </Button>
       </form>
-
-      {shareToken && (
-        <div className="share-link-block" aria-label="Lien de partage">
-          <p>Votre lien de partage :</p>
-          <a href={`/download/${shareToken}`}>{window.location.origin}/download/{shareToken}</a>
-        </div>
-      )}
     </section>
   );
 };

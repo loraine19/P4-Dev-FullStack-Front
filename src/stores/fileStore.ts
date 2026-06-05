@@ -1,6 +1,8 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 import { fileService } from '../services/fileService';
 import useAuthStore from './authStore';
+import { ERROR_MESSAGES } from '../constants/error-messages';
 import { isErrorMsg, type ErrorMsg } from '../types/error.types';
 import type { FileItemDto, UploadingFile, UploadParams } from '../types/file.types';
 
@@ -43,13 +45,25 @@ const useFileStore = create<IFileState & IFileActions>((set) => ({
       set({ isLoading: false, error: result });
       return false;
     }
-    if (result) {
-      if (isAuthenticated) {
-        set((s) => ({ files: [...s.files, result], isLoading: false }));
-      } else {
-        set({ shareToken: result.shareToken, isLoading: false });
-      }
+    if (!result) {
+      set({
+        isLoading: false,
+        error: { level: 'error', message: ERROR_MESSAGES.UPLOAD.NO_SHARE_TOKEN },
+      });
+      return false;
     }
+    if (isAuthenticated) {
+      set((s) => ({ files: [...s.files, result], isLoading: false }));
+      return true;
+    }
+    if (!result.shareToken) {
+      set({
+        isLoading: false,
+        error: { level: 'error', message: ERROR_MESSAGES.UPLOAD.NO_SHARE_TOKEN },
+      });
+      return false;
+    }
+    set({ shareToken: result.shareToken, isLoading: false });
     return true;
   },
 
@@ -85,12 +99,18 @@ const useFileStore = create<IFileState & IFileActions>((set) => ({
   removeFile: (id) => set((s) => ({ files: s.files.filter((f) => f.id !== id) })),
 
   /* UPLOADING FILE */
-  setUploadingFile: (payload) => set({ uploadingFile: payload }),
+  setUploadingFile: (payload) => {
+    set({ uploadingFile: payload });
+  },
 
   clearUploadingFile: () => set({ uploadingFile: null }),
 
   /* CLEAR ERROR */
   clearError: () => set({ error: null }),
 }));
+
+/* USE FILE STORE SHALLOW */
+export const useFileStoreShallow = <T,>(selector: (s: IFileState & IFileActions) => T) =>
+  useFileStore(useShallow(selector));
 
 export default useFileStore;

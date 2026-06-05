@@ -16,6 +16,7 @@ interface IContextMenuProps {
 const ContextMenu = ({ items }: IContextMenuProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   /* CLOSE MENU ON OUTSIDE CLICK */
   useEffect(() => {
@@ -31,15 +32,45 @@ const ContextMenu = ({ items }: IContextMenuProps) => {
     }
   }, [isOpen]);
 
+  /* FOCUS FIRST ITEM ON OPEN */
+  useEffect(() => {
+    if (isOpen) {
+      const first = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+      first?.focus();
+    }
+  }, [isOpen]);
+
   /* HANDLE ITEM CLICK */
   const handleItemClick = (action: () => void) => {
     action();
     setIsOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  /* KEYBOARD NAVIGATION */
+  const handleMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const menuItems = Array.from(
+      menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [],
+    );
+    const idx = menuItems.indexOf(document.activeElement as HTMLElement);
+
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      setIsOpen(false);
+      triggerRef.current?.focus();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      menuItems[(idx + 1) % menuItems.length]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      menuItems[(idx - 1 + menuItems.length) % menuItems.length]?.focus();
+    }
   };
 
   return (
     <div className="context-menu" ref={menuRef}>
       <button
+        ref={triggerRef}
         type="button"
         className="context-menu-trigger"
         onClick={() => setIsOpen(!isOpen)}
@@ -51,7 +82,7 @@ const ContextMenu = ({ items }: IContextMenuProps) => {
       </button>
 
       {isOpen && (
-        <div className="context-menu-panel" role="menu">
+        <div className="context-menu-panel" role="menu" onKeyDown={handleMenuKeyDown}>
           {items.map((item) => (
             <button
               key={item.label}

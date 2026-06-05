@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 import { tagService } from '../services/tagService';
 import { isErrorMsg, type ErrorMsg } from '../types/error.types';
 import type { Tag } from '../types/tag.types';
@@ -49,20 +50,22 @@ const useTagStore = create<ITagState & ITagActions>((set, get) => ({
   },
 
   /* REMOVE TAG */
-  removeTag: async(id) => {
+  removeTag: async (id) => {
     const isRemoved = await tagService.remove(id);
     if (isErrorMsg(isRemoved)) {
       set({ errorTags: isRemoved });
       return;
     }
-    
-    else{
-      const newTags = get().tags.filter((t) => t.id !== id);
-    set(() => ({ tags: newTags }));}
+    const newTags = get().tags.filter((t) => t.id !== id);
+    set(() => ({ tags: newTags }));
   },
 
   /* CLEAR ERROR */
   clearError: () => set({ errorTags: null }),
 }));
+
+/* USE TAG STORE SHALLOW */
+export const useTagStoreShallow = <T,>(selector: (s: ITagState & ITagActions) => T) =>
+  useTagStore(useShallow(selector));
 
 export default useTagStore;

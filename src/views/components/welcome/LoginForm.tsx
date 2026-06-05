@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useShallow } from 'zustand/react/shallow';
-import useAuthStore from '../../../stores/authStore';
+import { useAuthStoreShallow } from '../../../stores/authStore';
 import { LOGIN_INPUTS, type TLoginField } from '../../../constants/formConfigs';
 import type { FieldValues } from '../../../utils/fieldValidation';
 import Form from '../shared/forms/Form';
@@ -14,9 +13,11 @@ interface LoginFormProps {
 /* LOGIN FORM */
 const LoginForm = ({ onSwitch }: LoginFormProps) => {
   const navigate = useNavigate();
-  const { error, isLoading, login } = useAuthStore(
-    useShallow((s) => ({ error: s.error, isLoading: s.isLoading, login: s.login })),
-  );
+  const { error, isLoading, login } = useAuthStoreShallow((s) => ({
+    error: s.error,
+    isLoading: s.isLoading,
+    login: s.login,
+  }));
 
   /* HANDLE SUBMIT */
   const handleSubmit = async ({ email, password }: FieldValues<TLoginField>) => {

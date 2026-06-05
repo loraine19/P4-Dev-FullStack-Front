@@ -74,11 +74,11 @@ const TagComponent = ({
 
       {selectedTags.length > 0 ? (
         <div className="chip-row" aria-label="Tags sélectionnés">
-          {[...new Set(selectedTags)].map((tag) => (
+          {selectedTags.map((tag) => (
             <button
               aria-label={`Retirer le tag ${tag.name}`}
               title={`Retirer le tag ${tag.name}`}
-              key={`${tag.id}-chip`}
+              key={tag.id}
               type="button"
               className="chip chip-action"
               onClick={() => setSelectedTags(selectedTags.filter((t) => t.id !== tag.id))} 

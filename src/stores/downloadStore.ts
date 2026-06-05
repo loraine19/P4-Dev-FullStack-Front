@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 import { downloadService } from '../services/downloadService';
 import { isErrorMsg, type ErrorMsg } from '../types/error.types';
 import type { DownloadMeta } from '../types/download.types';
@@ -43,5 +44,9 @@ const useDownloadStore = create<IDownloadState & IDownloadActions>((set) => ({
   /* CLEAR ERRORS */
   clearErrors: () => set({ metaError: null, downloadError: null }),
 }));
+
+/* USE DOWNLOAD STORE SHALLOW */
+export const useDownloadStoreShallow = <T,>(selector: (s: IDownloadState & IDownloadActions) => T) =>
+  useDownloadStore(useShallow(selector));
 
 export default useDownloadStore;

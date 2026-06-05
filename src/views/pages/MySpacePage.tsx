@@ -1,14 +1,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useShallow } from 'zustand/react/shallow';
 import Sidebar from '../components/shared/Sidebar';
 import Switch from '../components/shared/Switch';
 import Button from '../components/shared/Button';
 import FileCard from '../components/myspace/FileCard';
 import Callout from '../components/shared/Callout';
 import useAuthStore from '../../stores/authStore';
-import useFileStore from '../../stores/fileStore';
-import useTagStore from '../../stores/tagStore';
+import { useFileStoreShallow } from '../../stores/fileStore';
+import { useTagStoreShallow } from '../../stores/tagStore';
 import { FileItem } from '../../entities/FileItem';
 import type { FileItemDto } from '../../types/file.types';
 import ContextMenu from '../components/shared/ContextMenu';
@@ -24,12 +23,17 @@ const FILTER_TYPE = {
 const MySpacePage = () => {
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
-  const { files, loadFiles, deleteFile, error , isLoading} = useFileStore(
-    useShallow(({ files, loadFiles, deleteFile, error , isLoading}) => ({ files, loadFiles, deleteFile, error , isLoading})),
-  );
-  const { removeTag , errorTags  } = useTagStore(
-    useShallow(({ removeTag , errorTags }) => ({ removeTag , errorTags })),
-  );
+  const { files, loadFiles, deleteFile, error, isLoading } = useFileStoreShallow((s) => ({
+    files: s.files,
+    loadFiles: s.loadFiles,
+    deleteFile: s.deleteFile,
+    error: s.error,
+    isLoading: s.isLoading,
+  }));
+  const { removeTag, errorTags } = useTagStoreShallow((s) => ({
+    removeTag: s.removeTag,
+    errorTags: s.errorTags,
+  }));
   const [activeFilter, setActiveFilter] = useState<typeof FILTER_TYPE[keyof typeof FILTER_TYPE]>(FILTER_TYPE.ALL);
   const [isSideMenuOpen, setIsSideMenuOpen] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
@@ -42,7 +46,12 @@ const MySpacePage = () => {
 
   /* INITIALIZE AVAILABLE TAGS */
   useEffect(() => {
-    setAvailableTags([...new Set(files.flatMap((f) => f.tags))]);
+    if (files.length === 0) return;
+    const allTags = files.flatMap((f) => f.tags);
+    const uniqueTags = Array.from(new Set(allTags.map((t) => t.id))).map((id) => {
+      return allTags.find((t) => t.id === id)!;
+    });
+    setAvailableTags(uniqueTags);
   }, [files]);
 
   /* FILTER TABS */
@@ -83,9 +92,6 @@ const MySpacePage = () => {
     const isLoggedOut = await logout();
     if (isLoggedOut) {
       navigate('/');
-    }
-    else {
-      alert(error);
     }
   };
 
@@ -170,8 +176,9 @@ const MySpacePage = () => {
                 {availableTags.map((tag) => {
                  const isActive = selectedTagIds.includes(tag.id);
                  return (
-                  <div
-                    key={tag.id} className={`chip chip-action${isActive ? ' chip-active' : ''}`}  >
+                   <div
+                  id={`tag-${tag.id}`}
+                    key={tag.id ?? 'test'} className={`chip chip-action${isActive ? ' chip-active' : ''}`}  >
                      <button type="button"
                        onClick={() => handleToggleTag(tag.id)}>
                       <p className="chip-name">{tag.name}</p>

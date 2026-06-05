@@ -1,8 +1,7 @@
 import { CloudUpload } from './Icons';
 import { useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useShallow } from 'zustand/react/shallow';
-import useFileStore from '../../../stores/fileStore';
+import { useFileStoreShallow } from '../../../stores/fileStore';
 import { MAX_FILE_SIZE, FORBIDDEN_EXTENSIONS } from '../../../constants/upload';
 import { ERROR_MESSAGES } from '../../../constants/error-messages';
 
@@ -19,9 +18,10 @@ declare global {
 const UploadButton = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const { uploadingFile, setUploadingFile } = useFileStore(
-    useShallow((s) => ({ uploadingFile: s.uploadingFile, setUploadingFile: s.setUploadingFile })),
-  );
+  const { uploadingFile, setUploadingFile } = useFileStoreShallow((s) => ({
+    uploadingFile: s.uploadingFile,
+    setUploadingFile: s.setUploadingFile,
+  }));
 
   /* VALIDATE FILE */
   const validateFile = ({ size, name }: File): string => {
@@ -41,7 +41,7 @@ const UploadButton = () => {
     }
 
     setUploadingFile({ file, error: '', name: file.name });
-    navigate('/upload');
+    navigate('/upload', { state: { preselectedFile: file } });
   };
 
   /* OPEN INPUT FALLBACK */

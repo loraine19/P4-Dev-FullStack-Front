@@ -24,7 +24,7 @@ const FileCard = ({ file, isExpired, expiryText, onDelete, onDownload, onCopyLin
   return (
     <div className="file-card">
       <div className="file-card-main">
-        <Description className="file-card-icon" />
+        <Description className="file-card-icon" aria-hidden="true" />
 
         <div className="file-card-copy">
           <h3 className="file-card-title">{file.originalName}</h3>

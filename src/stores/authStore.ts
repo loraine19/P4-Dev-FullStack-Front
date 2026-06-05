@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useShallow } from 'zustand/react/shallow';
 import { tokenStorage } from '../infrastructure/tokenStorage';
 import { authService } from '../services/authService';
 import type { UserPublic, LoginPayload, RegisterPayload } from '../types/user.types';
@@ -16,6 +17,7 @@ interface IAuthState {
 /* IAUTH ACTIONS */
 interface IAuthActions {
   verifySession(): Promise<void>;
+  setInitialized(): void;
   setUser(user: UserPublic): void;
   clearError(): void;
   clearAuth(): void;
@@ -36,13 +38,15 @@ const useAuthStore = create<IAuthState & IAuthActions>((set) => ({
   // called once on app mount - validates cookie (web) or Bearer token (mobile)
   verifySession: async () => {
     const result = await authService.me();
-    console.log('verifySession result from STORE', result);
     if (isErrorMsg(result)) {
       set({ isAuthenticated: false, user: null, isInitialized: true });
     } else {
       set({ isAuthenticated: true, user: result, isInitialized: true });
     }
   },
+
+  /* SET INITIALIZED */
+  setInitialized: () => set({ isInitialized: true }),
 
   /* SET USER */
   setUser: (user) => set({ user, isAuthenticated: true }),
@@ -83,18 +87,19 @@ const useAuthStore = create<IAuthState & IAuthActions>((set) => ({
 
   /* LOGOUT */
   logout: async (): Promise<boolean> => {
-    alert('logout from STORE');
-   const result = await authService.logout();
-   console.log('result', result);
-   if (isErrorMsg(result)) {
-    set({ error: result, isAuthenticated: false, isLoading: false });
-    return false;
-   }
-   else {
-     set({ user: null, isAuthenticated: false, error: null, isLoading: false });
-     return true;
-   }
+    const result = await authService.logout();
+    if (isErrorMsg(result)) {
+      set({ error: result, isAuthenticated: false, isLoading: false });
+      return false;
+    } else {
+      set({ user: null, isAuthenticated: false, error: null, isLoading: false });
+      return true;
+    }
   },
 }));
+
+/* USE AUTH STORE SHALLOW */
+export const useAuthStoreShallow = <T,>(selector: (s: IAuthState & IAuthActions) => T) =>
+  useAuthStore(useShallow(selector));
 
 export default useAuthStore;

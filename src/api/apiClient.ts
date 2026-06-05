@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { shouldClearTokenOn401, shouldRedirectOn401 } from './publicApiPaths';
 import { tokenStorage } from '../infrastructure/tokenStorage';
 
 const apiClient = axios.create({
@@ -23,18 +24,10 @@ apiClient.interceptors.response.use(
     const isAxios = axios.isAxiosError(error);
     const status = isAxios ? error.response?.status : null;
     const requestUrl = isAxios ? error.config?.url ?? '' : '';
-    const isLoginRequest = requestUrl.includes('/auth/login');
-    // session probe — 401 is expected when not logged in; verifySession handles it
-    const isMeRequest = requestUrl.includes('/auth/me');
 
-    // download endpoint uses 401 for wrong password - public route, not a session error
-    const isDownloadRequest = requestUrl.includes('/download/');
-
-    if (status === 401 && !isDownloadRequest) {
-      tokenStorage.remove();
-      if (!isLoginRequest && !isMeRequest) {
-        window.location.href = '/';
-      }
+    if (status === 401) {
+      if (shouldClearTokenOn401(requestUrl)) tokenStorage.remove();
+      if (shouldRedirectOn401(requestUrl)) window.location.href = '/';
     }
 
     return Promise.reject(error);

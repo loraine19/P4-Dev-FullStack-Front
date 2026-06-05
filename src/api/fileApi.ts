@@ -7,7 +7,7 @@ interface IFileApi {
   getAll(): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<FileItemDto[]>>>;
   upload(formData: FormData): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<FileItemDto>>>;
   uploadAnonymous(formData: FormData): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<FileItemDto>>>;
-  remove(id: number): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<null>>>;
+  remove(id: number): Promise<import('axios').AxiosResponse<ApiResponseEnvelope<void>>>;
 }
 
 /* FILE API */
@@ -33,7 +33,7 @@ class FileApi implements IFileApi {
 
   /* REMOVE */
   remove(id: number) {
-    return apiClient.delete<ApiResponseEnvelope<null>>(`/files/${id}`);
+    return apiClient.delete<ApiResponseEnvelope<void>>(`/files/${id}`);
   }
 }
 

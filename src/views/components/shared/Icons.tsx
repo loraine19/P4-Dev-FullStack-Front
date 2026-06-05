@@ -1,5 +1,5 @@
 /* MATERIAL SYMBOLS INLINE SVG -  replaces @project-lary/react-material-symbols */
-// 4 icons only: Description, Lock, MoreVert, CloudUpload
+// 5 icons: Description, Lock, MoreVert, CloudUpload, ContentCopy
 // Source: Google Material Symbols Outlined 24px (Apache 2.0)
 
 type SvgProps = React.SVGProps<SVGSVGElement>;
@@ -10,6 +10,7 @@ const base: SvgProps = {
   width: '24',
   viewBox: '0 -960 960 960',
   fill: 'currentColor',
+  'aria-hidden': 'true',
 };
 
 export const Description = (props: SvgProps) => (
@@ -33,5 +34,17 @@ export const MoreVert = (props: SvgProps) => (
 export const CloudUpload = (props: SvgProps) => (
   <svg {...base} {...props}>
     <path d="M260-160q-91 0-155.5-63T40-377q0-78 47-139t123-78q25-92 100-149t170-57q117 0 198.5 81.5T760-520q69 8 114.5 59.5T920-340q0 75-52.5 127.5T740-160H520q-33 0-56.5-23.5T440-240v-206l-64 62-56-56 160-160 160 160-56 56-64-62v206h220q42 0 71-29t29-71q0-42-29-71t-71-29h-60v-80q0-83-58.5-141.5T480-720q-83 0-141.5 58.5T280-520h-20q-58 0-99 41t-41 99q0 58 41 99t99 41h100v80H260Zm220-280Z" />
+  </svg>
+);
+
+export const ContentCopy = (props: SvgProps) => (
+  <svg {...base} {...props}>
+    <path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Z" />
+  </svg>
+);
+
+export const Change = (props: SvgProps) => (
+  <svg {...base} {...props}>
+     <path d="M482-160q-134 0-228-93t-94-227v-7l-64 64-56-56 160-160 160 160-56 56-64-64v7q0 100 70.5 170T482-240q26 0 51-6t49-18l60 60q-38 22-78 33t-82 11Zm278-161L600-481l56-56 64 64v-7q0-100-70.5-170T478-720q-26 0-51 6t-49 18l-60-60q38-22 78-33t82-11q134 0 228 93t94 227v7l64-64 56 56-160 160Z"/>
   </svg>
 );

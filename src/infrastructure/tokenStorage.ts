@@ -13,8 +13,6 @@ class TokenStorage implements ITokenStorage {
 
   /* GET */
   get(key?: string) {
-    const debug = localStorage.getItem(key || this.key);
-    alert('get token from storage: '+debug);
     return localStorage.getItem(key || this.key);
   }
 
@@ -24,12 +22,7 @@ class TokenStorage implements ITokenStorage {
   }
 
   /* REMOVE */
-  remove(key?: string) {
-    const debug = localStorage.getItem(key || this.key);
-    alert('remove token from storage: '+debug);
-    localStorage.removeItem(key || this.key);
-    const debug2 = localStorage.getItem(key || this.key);
-    alert('removed token ?? : '+debug2);
+  remove(key?: string) { localStorage.removeItem(key || this.key);
   }
 }
 

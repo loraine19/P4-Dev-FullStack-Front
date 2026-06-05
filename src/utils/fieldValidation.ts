@@ -9,7 +9,6 @@ export type FieldValues<T extends string> = Record<T, string>;
 export type FieldErrors<T extends string> = Partial<Record<T, string>>;
 
 /* VALIDATE */
-// runs rules in order, returns first error message or ''
 export const validate = (
   value: string,
   rules: Rule[],
@@ -22,7 +21,6 @@ export const validate = (
 };
 
 /* VALIDATE ALL */
-// validates all fields at once, returns { field: errorMsg }
 export const validateAll = <T extends string>(
   values: FieldValues<T>,
   rules: FieldRules<T>,

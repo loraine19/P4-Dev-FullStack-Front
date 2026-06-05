@@ -1,4 +1,5 @@
 import type { FileItemDto } from '../types/file.types';
+import { formatFileSize } from '../utils/formatFileSize';
 
 /* FILE ENTITY */
 export class FileItem {
@@ -37,12 +38,8 @@ export class FileItem {
   }
 
   /* DISPLAY SIZE */
-  // converts bytes to human-readable string (KB / MB / GB)
   displaySize(): string {
-    if (this.size < 1024) return `${this.size} B`;
-    if (this.size < 1024 * 1024) return `${(this.size / 1024).toFixed(1)} KB`;
-    if (this.size < 1024 * 1024 * 1024) return `${(this.size / (1024 * 1024)).toFixed(1)} MB`;
-    return `${(this.size / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+    return formatFileSize(this.size);
   }
 
   /* DISPLAY NAME */

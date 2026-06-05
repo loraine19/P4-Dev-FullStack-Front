@@ -1,5 +1,4 @@
-import { useShallow } from 'zustand/react/shallow';
-import useAuthStore from '../../../stores/authStore';
+import { useAuthStoreShallow } from '../../../stores/authStore';
 import { REGISTER_INPUTS, type TRegisterField } from '../../../constants/formConfigs';
 import type { FieldValues } from '../../../utils/fieldValidation';
 import Form from '../shared/forms/Form';
@@ -13,9 +12,11 @@ interface RegisterFormProps {
 
 /* REGISTER FORM */
 const RegisterForm = ({ onSwitch }: RegisterFormProps) => {
-  const { error, isLoading, register } = useAuthStore(
-    useShallow((s) => ({ error: s.error, isLoading: s.isLoading, register: s.register })),
-  );
+  const { error, isLoading, register } = useAuthStoreShallow((s) => ({
+    error: s.error,
+    isLoading: s.isLoading,
+    register: s.register,
+  }));
 
   /* HANDLE SUBMIT */
   const handleSubmit = async ({ passwordConfirm: _confirm, ...payload }: FieldValues<TRegisterField>) => {

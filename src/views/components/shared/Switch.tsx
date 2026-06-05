@@ -14,11 +14,13 @@ interface ISwitchProps {
 /* SWITCH */
 const Switch = ({ activeTab, tabs, onTabChange }: ISwitchProps) => {
   return (
-    <div className="switch-tabs">
+    <div className="switch-tabs" role="tablist">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           type="button"
+          role="tab"
+          aria-selected={activeTab === tab.id}
           className={`switch-tab ${activeTab === tab.id ? 'is-active' : ''}`}
           onClick={() => onTabChange(tab.id)}
         >
